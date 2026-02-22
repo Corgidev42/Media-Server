@@ -1,5 +1,6 @@
 # Fichiers à ignorer
 .DS_Store
+.env
 .env.local
 *.log
 
