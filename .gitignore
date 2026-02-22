@@ -1,0 +1,14 @@
+# Fichiers à ignorer
+.DS_Store
+.env.local
+*.log
+
+# Sauvegardes
+*.tar.gz
+*.zip
+backup/
+
+# Données locales (ne pas versionner)
+data/
+downloads/
+media/

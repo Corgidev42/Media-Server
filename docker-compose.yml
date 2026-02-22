@@ -1,0 +1,237 @@
+version: "3.9"
+
+#==============================================================================
+# Stack Servarr - Configuration Docker Compose
+# Architecture: Atomic Moves (/data structure)
+# Réseau: media-network (isolé)
+# VPN: Gluetun (NordVPN) pour qBittorrent uniquement
+#==============================================================================
+
+services:
+
+  #============================================================================
+  # Gluetun - Conteneur VPN (NordVPN)
+  # Note: Seul qBittorrent passe par ce VPN
+  #============================================================================
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8090:8090"  # Port qBittorrent Web UI
+      - "6881:6881"  # Port qBittorrent TCP
+      - "6881:6881/udp"  # Port qBittorrent UDP
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=${NORDVPN_SERVICE_USER}
+      - OPENVPN_PASSWORD=${NORDVPN_SERVICE_PASSWORD}
+      - SERVER_COUNTRIES=France
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16
+      - TZ=${TZ}
+    volumes:
+      - gluetun_config:/gluetun
+    networks:
+      - media-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "https://1.1.1.1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  #============================================================================
+  # qBittorrent - Client Torrent (via VPN Gluetun)
+  #============================================================================
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"  # Tout le trafic passe par Gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8090
+      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest  # VueTorrent UI (optionnel)
+    volumes:
+      - qbittorrent_config:/config
+      - ${DATA_PATH}/downloads:/data/downloads  # Downloads
+    restart: unless-stopped
+
+  #============================================================================
+  # Flaresolverr - Contournement Cloudflare
+  #============================================================================
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    ports:
+      - "8191:8191"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=${TZ}
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Prowlarr - Gestionnaire d'indexeurs
+  #============================================================================
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    ports:
+      - "9696:9696"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - prowlarr_config:/config
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Radarr - Gestionnaire de films
+  #============================================================================
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - radarr_config:/config
+      - ${DATA_PATH}:/data  # Structure atomique
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Sonarr - Gestionnaire de séries
+  #============================================================================
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - "8989:8989"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - sonarr_config:/config
+      - ${DATA_PATH}:/data  # Structure atomique
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Seerr - Interface de requêtes (Alternative à Overseerr)
+  #============================================================================
+  seerr:
+    image: fallenbagel/jellyseerr:latest  # Seerr est un fork de Jellyseerr
+    container_name: seerr
+    ports:
+      - "5055:5055"
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TZ}
+    volumes:
+      - seerr_config:/app/config
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Plex Media Server - Serveur de lecture multimédia
+  #============================================================================
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    ports:
+      - "32400:32400"    # Interface web Plex
+      - "1900:1900/udp"  # DLNA
+      - "3005:3005"      # Plex Companion
+      - "8324:8324"      # Plex for Roku
+      - "32410:32410/udp" # GDM Network Discovery
+      - "32412:32412/udp" # GDM Network Discovery
+      - "32413:32413/udp" # GDM Network Discovery
+      - "32414:32414/udp" # GDM Network Discovery
+      - "32469:32469"    # Plex DLNA Server
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM:-}
+      - ADVERTISE_IP=http://192.168.1.17:32400/
+      - PLEX_NETWORK_MODE=host
+    volumes:
+      - plex_config:/config
+      - ${DATA_PATH}/media:/data/media:ro
+      - /tmp/plex:/transcode
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
+  # Jackett - Alternative pour indexeurs complexes (YGG, etc.)
+  #============================================================================
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    ports:
+      - "9117:9117"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - jackett_config:/config
+    networks:
+      - media-network
+    restart: unless-stopped
+
+#==============================================================================
+# Volumes Docker (configurations persistantes)
+#==============================================================================
+volumes:
+  gluetun_config:
+    name: gluetun_config
+  qbittorrent_config:
+    name: qbittorrent_config
+  prowlarr_config:
+    name: prowlarr_config
+  radarr_config:
+    name: radarr_config
+  sonarr_config:
+    name: sonarr_config
+  seerr_config:
+    name: seerr_config
+  plex_config:
+    name: plex_config
+  jackett_config:
+    name: jackett_config
+
+#==============================================================================
+# Réseau isolé
+#==============================================================================
+networks:
+  media-network:
+    name: media-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
