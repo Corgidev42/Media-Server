@@ -261,9 +261,62 @@ Une fois les conteneurs démarrés :
    - Renommage automatique : **Activé**
    - Format : `{Movie Title} ({Release Year}) {Quality Full}`
 
-4. **Qualité** :
-   - Settings → Profiles
-   - Créer un profil personnalisé (1080p minimum, 4K si souhaité)
+4. **Custom Formats (Qualité et Langues)** :
+   
+   **🎯 Configuration pour le contenu français multi-audio (VF/VO/VOSTFR)** :
+   
+   **a) Créer les Custom Formats** (Settings → Custom Formats → Add) :
+   
+   **Formats de Langue** :
+   - **MULTi** (Score: 100) - Priorité maximale
+     - Condition: Release Title → `\b(MULTi|MULTI)\b`
+   
+   - **French Audio** (Score: 50)
+     - Condition: Release Title → `\b(FRENCH|VFF|VFQ|VF2|TRUEFRENCH|VF)\b`
+   
+   - **VOSTFR** (Score: 50)
+     - Condition: Release Title → `\b(VOSTFR|SUBFRENCH)\b`
+   
+   **Formats de Qualité Vidéo** :
+   - **x265/HEVC** (Score: 15) - Meilleure compression
+     - Condition: Release Title → `\b(x265|HEVC|h265)\b`
+   
+   - **Remux** (Score: 80) - Qualité Blu-ray originale
+     - Condition: Release Title → `\bREMUX\b`
+   
+   - **BluRay** (Score: 30)
+     - Condition: Release Title → `\b(BluRay|Blu-ray|BD)\b`
+   
+   - **HDR** (Score: 40)
+     - Condition: Release Title → `\b(HDR|HDR10)\b`
+   
+   - **Dolby Vision** (Score: 50)
+     - Condition: Release Title → `\b(DV|DoVi|Dolby.Vision)\b`
+   
+   **Formats Audio Premium** :
+   - **Atmos** (Score: 25)
+     - Condition: Release Title → `\b(ATMOS|Atmos)\b`
+   
+   - **TrueHD** (Score: 20)
+     - Condition: Release Title → `\b(TrueHD|TRUE-HD)\b`
+   
+   - **DTS** (Score: 15)
+     - Condition: Release Title → `\b(DTS|DTS-HD|DTS-MA)\b`
+   
+   **Formats à ÉVITER** (scores négatifs) :
+   - **YIFY** (Score: -100)
+     - Condition: Release Title → `\b(YIFY|YTS)\b`
+   
+   - **CAM/TS** (Score: -200)
+     - Condition: Release Title → `\b(CAM|TS|TELESYNC|HDTS|PDVD|Screener|SCR)\b`
+   
+   **b) Appliquer à votre profil** (Settings → Profiles) :
+   - **Language** : `French` ou `Original`
+   - **Upgrade Until** : `Bluray-1080p` (ou 4K)
+   - **Upgrade Until Custom Format Score** : `100`
+   - **Minimum Custom Format Score Increment** : `1`
+   
+   Avec cette configuration, Radarr priorisera toujours les releases MULTi (VF+VO+VOSTFR) !
 
 ---
 
@@ -282,6 +335,15 @@ Une fois les conteneurs démarrés :
 
 3. **Naming** :
    - Format : `{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}`
+
+4. **Custom Formats pour les séries** :
+   - Sonarr supporte également les Custom Formats (v4+)
+   - Utilisez les mêmes configurations que Radarr (MULTi, x265, etc.)
+   - Settings → Profiles → Release Profiles pour filtrer par mots-clés
+   
+   **Release Profiles recommandés** :
+   - **Must Contain** : `MULTi, FRENCH, VFF, VOSTFR` (séries françaises)
+   - **Must Not Contain** : `YIFY, YTS, CAM, TS, HDCAM`
 
 ---
 

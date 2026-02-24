@@ -223,6 +223,64 @@ Pour chaque app (Radarr et Sonarr) :
 
 ---
 
+## 🔴 Radarr : "Unable to Import Automatically" - Manual Import Required
+
+**Symptôme** :
+```
+Downloaded - Unable to Import Automatically
+Found matching movie via grab history, but release was matched to movie by ID.
+Manual Import required.
+```
+
+### 🎯 Causes possibles :
+
+**1. Fichier directement dans /downloads/complete**
+- Radarr préfère que les fichiers soient dans des **sous-dossiers**
+- Solution : Créer un dossier pour le film et y déplacer le fichier
+
+**2. Nom de fichier non reconnu**
+- Le nom ne correspond pas au format attendu
+- Solution : Activer "Rename Movies" dans Settings → Media Management
+
+**3. Permissions incorrectes**
+- Le fichier n'a pas les bonnes permissions (PUID/PGID)
+- Solution : Vérifier les permissions avec `ls -la /Users/dev/data/downloads/complete/`
+
+### ✅ Solutions :
+
+**Option 1 : Import manuel (RAPIDE)**
+1. Radarr → **Activity** → **Queue**
+2. Trouvez le film avec l'erreur
+3. Cliquez sur l'icône 📁 **Manual Import**
+4. Sélectionnez le fichier et cliquez **Import**
+
+**Option 2 : Configurer qBittorrent pour créer des sous-dossiers**
+1. qBittorrent → **Tools** → **Options** → **Downloads**
+2. ✅ Activer : "Create subfolder for torrents with multiple files"
+3. ✅ Activer : "Keep incomplete torrents in"
+
+**Option 3 : Activer le renommage automatique dans Radarr**
+1. Radarr → **Settings** → **Media Management**
+2. ✅ Activer : **Rename Movies**
+3. ✅ Activer : **Replace Illegal Characters**
+
+### 🎯 Custom Formats pour optimiser le contenu français
+
+Pour **toujours prioriser les releases MULTi** (VF + VO + VOSTFR) :
+
+1. **Radarr** → **Settings** → **Custom Formats** → **Add**
+2. Créez les formats (voir [GUIDE.md](GUIDE.md) pour les détails) :
+   - **MULTi** (Score: 100) - Priorité maximale
+   - **French Audio** (Score: 50) - VFF, TRUEFRENCH, etc.
+   - **VOSTFR** (Score: 50) - Sous-titres français
+3. **Settings** → **Profiles** → Éditez votre profil :
+   - **Upgrade Until Custom Format Score** : `100`
+   - **Language** : `French` ou `Original`
+
+**Résultat** : Radarr cherchera **toujours en priorité** les versions avec audio français multiple !
+
+---
+
 ## 🔴 Rotation VPN automatique : Attention aux interruptions
 
 **Le script `auto-rotate-vpn.sh` redémarre Gluetun, ce qui INTERROMPT qBittorrent !**

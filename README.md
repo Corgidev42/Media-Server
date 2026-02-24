@@ -59,6 +59,60 @@ docker-compose restart plex
 docker-compose ps
 ```
 
+## 🔧 Makefile - Gestion simplifiée
+
+**Toutes les commandes courantes sont disponibles via le Makefile !**
+
+```bash
+# Afficher l'aide complète
+make help
+
+# Commandes essentielles
+make start              # Démarrer tous les services
+make stop               # Arrêter tous les services
+make restart            # Redémarrer tous les services
+make status             # Voir l'état des services
+
+# Logs
+make logs               # Voir tous les logs
+make logs-radarr        # Logs Radarr uniquement
+make logs-sonarr        # Logs Sonarr uniquement
+make logs-qbit          # Logs qBittorrent
+
+# Mise à jour
+make update             # Mettre à jour tous les services
+make update-radarr      # Mettre à jour Radarr uniquement
+make update-seerr       # Mettre à jour Seerr uniquement
+
+# Backup & Restore
+make backup-all         # Sauvegarder toutes les configs
+make backup-radarr      # Sauvegarder Radarr
+make list-backups       # Lister les sauvegardes
+
+# VPN
+make vpn-check          # Vérifier l'IP VPN
+make vpn-rotate         # Changer de serveur VPN
+make vpn-restart        # Redémarrer le VPN
+
+# Diagnostic
+make check              # Vérification complète du système
+make health             # État de santé des services
+make media-stats        # Statistiques des médias
+make qbit-password      # Afficher le mot de passe qBittorrent
+
+# Nettoyage
+make clean              # Nettoyer les images inutilisées
+make clean-downloads    # Nettoyer les téléchargements
+
+# URLs
+make urls               # Afficher toutes les URLs d'accès
+```
+
+**Installation complète en une commande :**
+```bash
+make install            # Crée la structure + démarre tout
+```
+
 ## ⚙️ Configuration des services (Ordre recommandé)
 
 ### 1. Prowlarr (http://localhost:9696)
@@ -84,6 +138,8 @@ docker-compose ps
   - Host : `gluetun`
   - Port : `8090`
   - Category : `radarr-movies`
+- **🎯 Custom Formats (VF/VOSTFR)** : Pour prioriser les releases MULTi (VF+VO+VOSTFR), configurez les Custom Formats
+  - Voir [GUIDE.md](GUIDE.md) section "Custom Formats (Qualité et Langues)" pour la configuration complète
 
 ### 4. Sonarr (http://localhost:8989)
 - Settings → Media Management → Root Folder : `/data/media/tv`
@@ -91,6 +147,8 @@ docker-compose ps
   - Host : `gluetun`
   - Port : `8090`
   - Category : `sonarr-tv`
+- **Custom Formats** : Même configuration que Radarr (voir [GUIDE.md](GUIDE.md))
+
 
 ### 5. Plex (http://localhost:32400/web)
 - Connectez-vous avec votre compte Plex
@@ -121,6 +179,7 @@ docker-compose ps
 
 ### ⚙️ Fichiers techniques
 
+- **Makefile** - 🔧 **Commandes simplifiées** (make start, make update, make backup-all, etc.)
 - **.env** - Variables d'environnement (VPN, Plex claim token)
 - **docker-compose.yml** - Stack complète (8 services)
 - **cleanup.sh** - Script de nettoyage radical
