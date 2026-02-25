@@ -138,8 +138,11 @@ make install            # Crée la structure + démarre tout
   - Host : `gluetun`
   - Port : `8090`
   - Category : `radarr-movies`
-- **🎯 Custom Formats (VF/VOSTFR)** : Pour prioriser les releases MULTi (VF+VO+VOSTFR), configurez les Custom Formats
-  - Voir [GUIDE.md](GUIDE.md) section "Custom Formats (Qualité et Langues)" pour la configuration complète
+- **🎯 Custom Formats VF/VO** : Système de scores pour télécharger automatiquement en MULTi (VF+VO+VOSTFR)
+  - MULTi (1000 pts) → VOSTFR (500 pts) → VFF (200 pts)
+  - Radarr upgrade automatiquement vers le MULTi quand il apparaît
+  - Voir [GUIDE.md](GUIDE.md) section "Custom Formats" pour configuration JSON complète
+  - Une fois téléchargé, changez la piste audio (VF ⇄ VO) directement dans Plex !
 
 ### 4. Sonarr (http://localhost:8989)
 - Settings → Media Management → Root Folder : `/data/media/tv`
@@ -155,7 +158,9 @@ make install            # Crée la structure + démarre tout
 - Ajoutez les bibliothèques :
   - Films : `/data/media/movies`
   - Séries : `/data/media/tv`
-- **🎯 Plex Watchlist (RECOMMANDÉ)** : Configurez Radarr/Sonarr pour surveiller votre Plex Watchlist
+- **� Choisir VF ou VO** : Pendant la lecture, cliquez sur ⚙️ → Audio → Sélectionnez la piste souhaitée
+  - Définir par défaut : Paramètres → Compte → Langue audio par défaut (`Français` ou `Original`)
+- **�🎯 Plex Watchlist (RECOMMANDÉ)** : Configurez Radarr/Sonarr pour surveiller votre Plex Watchlist
   - **Radarr** → Settings → Lists → Add List → Plex Watchlist
   - **Sonarr** → Settings → Import Lists → Add List → Plex Watchlist
   - **Enable Automatic Add** : ✅
@@ -173,7 +178,7 @@ make install            # Crée la structure + démarre tout
 ### 🚀 Guides essentiels
 
 1. **[README.md](README.md)** ← Vous êtes ici (vue d'ensemble + démarrage rapide)
-2. **[GUIDE.md](GUIDE.md)** - 📖 **Configuration complète** (étape par étape + optimisation indexeurs + gestion services)
+2. **[GUIDE.md](GUIDE.md)** - 📖 **Configuration complète** (étape par étape + Custom Formats VF/VO + optimisation)
 3. **[NOTES-IMPORTANTES.md](NOTES-IMPORTANTES.md)** - ⚠️ **Troubleshooting** (pièges courants + solutions)
 4. **[PLEX-WATCHLIST-SETUP.md](PLEX-WATCHLIST-SETUP.md)** - 🌟 **Workflow Plex uniquement** (sans Seerr)
 

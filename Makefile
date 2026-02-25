@@ -85,6 +85,11 @@ help: ## Affiche l'aide
 	@echo "  make media-stats        - Statistiques média"
 	@echo "  make test-download      - Tester un téléchargement"
 	@echo ""
+	@echo "$(YELLOW)🎞️  VF/VO (Gestion langues) :$(NC)"
+	@echo "  make check-audio        - Vérifier les pistes audio d'un film"
+	@echo "  make list-multi         - Lister les films MULTi (VF+VO)"
+	@echo "  make count-languages    - Compter les films par langue"
+	@echo ""
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
 
 # ============================================================================
@@ -95,7 +100,7 @@ start: ## Démarrer tous les services
 	@echo "$(GREEN)🚀 Démarrage de la stack Media Server...$(NC)"
 	@$(COMPOSE) up -d
 	@echo "$(GREEN)✅ Stack démarrée ! Attendez 10-15 secondes que tout soit prêt.$(NC)"
-	@sleep 5
+	@sleep 15
 	@make status
 
 stop: ## Arrêter tous les services
@@ -476,6 +481,74 @@ install: ## Installation complète (première fois)
 	@echo "$(GREEN)✅ Installation terminée !$(NC)"
 	@echo ""
 	@make urls
+
+# ============================================================================
+# VF/VO - Gestion des langues
+# ============================================================================
+
+check-audio: ## Vérifier les pistes audio d'un fichier
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  Vérification des pistes audio$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@read -p "$(YELLOW)Nom du film (ex: Inception) : $(NC)" movie; \
+	file=$$(find /Users/dev/data/media/movies -iname "*$$movie*" -type f \( -name "*.mkv" -o -name "*.mp4" -o -name "*.avi" \) | head -1); \
+	if [ -z "$$file" ]; then \
+		echo "$(RED)❌ Film non trouvé !$(NC)"; \
+	else \
+		echo "$(GREEN)📁 Fichier : $$file$(NC)"; \
+		echo ""; \
+		echo "$(YELLOW)🔊 Pistes audio :$(NC)"; \
+		docker run --rm -v /Users/dev/data:/data jrottenberg/ffmpeg:4.4-alpine \
+			-i "$$file" 2>&1 | grep "Audio:" | nl; \
+		echo ""; \
+		echo "$(YELLOW)📝 Sous-titres :$(NC)"; \
+		docker run --rm -v /Users/dev/data:/data jrottenberg/ffmpeg:4.4-alpine \
+			-i "$$file" 2>&1 | grep "Subtitle:" | nl || echo "Aucun sous-titre"; \
+	fi
+
+list-multi: ## Lister les films avec pistes audio multiples
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  Films MULTi (plusieurs pistes audio)$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "$(YELLOW)🔍 Recherche en cours...$(NC)"
+	@echo ""
+	@count=0; \
+	find /Users/dev/data/media/movies -type f \( -name "*.mkv" -o -name "*.mp4" \) 2>/dev/null | while read file; do \
+		tracks=$$(docker run --rm -v /Users/dev/data:/data jrottenberg/ffmpeg:4.4-alpine \
+			-i "$$file" 2>&1 | grep -c "Audio:" || echo "0"); \
+		if [ "$$tracks" -ge 2 ]; then \
+			basename=$$(basename "$$file"); \
+			echo "$(GREEN)✅ $$basename$(NC) ($$tracks pistes)"; \
+			count=$$((count + 1)); \
+		fi; \
+	done; \
+	echo ""; \
+	echo "$(GREEN)Nombre total de films MULTi : $$count$(NC)"
+
+count-languages: ## Compter les films par langue
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  Statistiques des langues audio$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "$(YELLOW)📊 Analyse en cours (peut prendre quelques minutes)...$(NC)"
+	@echo ""
+	@multi=0; single=0; total=0; \
+	find /Users/dev/data/media/movies -type f \( -name "*.mkv" -o -name "*.mp4" \) 2>/dev/null | while read file; do \
+		tracks=$$(docker run --rm -v /Users/dev/data:/data jrottenberg/ffmpeg:4.4-alpine \
+			-i "$$file" 2>&1 | grep -c "Audio:" || echo "0"); \
+		if [ "$$tracks" -ge 2 ]; then \
+			multi=$$((multi + 1)); \
+		elif [ "$$tracks" -eq 1 ]; then \
+			single=$$((single + 1)); \
+		fi; \
+		total=$$((total + 1)); \
+	done; \
+	echo "$(GREEN)📽️  Total de films       : $$total$(NC)"; \
+	echo "$(GREEN)🌍 Films MULTi (VF+VO)  : $$multi$(NC)"; \
+	echo "$(YELLOW)🗣️  Films mono-langue    : $$single$(NC)"; \
+	echo ""
 
 # Default target
 .DEFAULT_GOAL := help

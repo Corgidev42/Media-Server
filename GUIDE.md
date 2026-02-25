@@ -181,15 +181,105 @@ Une fois les conteneurs démarrés :
    - Configurer avec votre **Passkey YGG** (récupérable sur YGG → Mon Compte)
    - Test → Save
 
-3. **Ajouter d'autres indexeurs publics** (optionnel) :
-   - Indexers → Add Indexer → Rechercher "1337x", "RARBG", etc.
-   - **IMPORTANT** : Ajoutez le tag `flaresolverr` pour éviter les erreurs 429 (Too Many Requests)
-   - Edit indexer → Scroll down → **Tags** → Ajoutez `flaresolverr` → Save
+3. **Ajouter les meilleurs indexeurs publics (2026)** :
+
+   **🔥 Indexeurs recommandés** :
+   
+   | Nom | Langue | Qualité MULTi | Flaresolverr |
+   |-----|--------|--------------|-------------|
+   | **Torrent9** | FR/MULTi | ⭐⭐⭐⭐⭐ | ✅ Requis |
+   | **1337x** | EN/MULTi | ⭐⭐⭐⭐⭐ | ✅ Requis |
+   | **The Pirate Bay** | EN/FR/MULTi | ⭐⭐⭐⭐ | ✅ Requis |
+   | **YGGTorrent** | FR/MULTi | ⭐⭐⭐⭐⭐ | ❌ Pas besoin |
+   | **TorrentGalaxy** | EN/MULTi | ⭐⭐⭐⭐ | ✅ Recommandé |
+   | **LimeTorrents** | EN/MULTi | ⭐⭐⭐ | ✅ Recommandé |
+   | **EZTV** | EN (TV only) | ⭐⭐⭐⭐ | ❌ Pas besoin |
+   
+   **⚠️ Notes importantes** :
+   - **RARBG** a fermé définitivement en mai 2023 (RIP 🪦)
+   - **🇫🇷 ESSENTIEL pour MULTi** : Les indexeurs **français** (Torrent9, YGGTorrent) utilisent la nomenclature "MULTi" dans les noms de release. Les indexeurs internationaux (1337x, TorrentGalaxy) indiquent "Multi-Language" mais **PAS dans le nom du fichier**, donc votre Custom Format MULTi ne fonctionnera pas avec eux seuls.
+   - **Solution** : Configurez AU MOINS **Torrent9** OU **YGGTorrent** pour avoir des releases MULTi détectables par Radarr.
+   
+   **Configuration détaillée par indexeur** :
+   
+   **a) Torrent9** (Meilleur pour FR/MULTi) :
+   ```
+   Indexer Priority: 5 (priorité maximale)
+   Minimum Seeders: 5
+   Tags: flaresolverr
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ❌ Replace MULTi by another language (DÉCOCHÉ)
+   ❌ Replace VOSTFR and SUBFRENCH with ENGLISH (DÉCOCHÉ)
+   ```
+   
+   **b) 1337x** :
+   ```
+   Indexer Priority: 10
+   Minimum Seeders: 10
+   Multi Languages: English, French
+   Tags: flaresolverr
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ```
+   
+   **c) The Pirate Bay** :
+   ```
+   Indexer Priority: 15
+   Minimum Seeders: 10
+   Multi Languages: English, French
+   Tags: flaresolverr
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ```
+   
+   **d) TorrentGalaxy** :
+   ```
+   Indexer Priority: 25
+   Minimum Seeders: 5
+   Multi Languages: English, French
+   Tags: flaresolverr
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ```
+   
+   **e) EZTV** (Séries TV uniquement) :
+   ```
+   Indexer Priority: 30
+   Minimum Seeders: 5
+   Tags: (aucun)
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ```
+   
+   **f) LimeTorrents** :
+   ```
+   Indexer Priority: 35
+   Minimum Seeders: 5
+   Tags: flaresolverr
+   ✅ Enable RSS
+   ✅ Enable Automatic Search
+   ✅ Enable Interactive Search
+   ```
+   
+   **⚠️ IMPORTANT - Options "Replace MULTi"** :
+   
+   Pour les indexeurs français (Torrent9, etc.), vous verrez ces options :
+   - **"Replace MULTi by another language in release name"** → ❌ **LAISSER DÉCOCHÉ**
+   - **"Replace VOSTFR and SUBFRENCH with ENGLISH"** → ❌ **LAISSER DÉCOCHÉ**
+   
+   **Pourquoi ?** Si vous cochez ces options, Prowlarr remplacera le mot "MULTi" par "FRENCH" dans le nom du torrent. Résultat : Radarr pensera que c'est un film VF uniquement (pas MULTi), et votre Custom Format "MULTi" ne fonctionnera plus !
    
    **Pourquoi Flaresolverr ?**
    - Contourne Cloudflare et les protections DDOS
    - Réduit les erreurs "Request Limit reached" (HTTP 429)
-   - Recommandé pour TOUS les indexeurs publics (1337x, RARBG, etc.)
+   - **Requis** pour : 1337x, The Pirate Bay, Torrent9, TorrentGalaxy, LimeTorrents
+   - **Pas nécessaire** pour : YGGTorrent, EZTV
 
 4. **Synchroniser avec Radarr/Sonarr** :
    - Settings → Apps → Add Application
@@ -242,6 +332,14 @@ Une fois les conteneurs démarrés :
 
 **Accès** : http://localhost:7878
 
+> **📋 Résumé de la configuration optimale** :
+> - ✅ Root Folder : `/data/media/movies`
+> - ✅ Download Client : `gluetun:8090` (qBittorrent via VPN)
+> - ✅ Custom Formats : MULTi (Score: 100) pour VF+VO+VOSTFR
+> - ✅ Taille max : 15 GB pour 1080p
+> - ✅ Indexeurs : Torrent9 (Priority: 5), 1337x (Priority: 10), YGG (Priority: 3)
+> - ✅ Multi Languages : English + French dans chaque indexeur
+
 #### Configuration :
 
 1. **Root Folder** :
@@ -263,60 +361,264 @@ Une fois les conteneurs démarrés :
 
 4. **Custom Formats (Qualité et Langues)** :
    
-   **🎯 Configuration pour le contenu français multi-audio (VF/VO/VOSTFR)** :
+   **🎯 Configuration optimale pour MULTi/VOSTFR/VFF avec système de scores**
+   
+   **Le principe** : Utiliser un système de scores pour prioriser automatiquement les meilleures releases :
+   - **MULTi** (1000 pts) : Objectif final, contient VF + VO
+   - **VOSTFR** (500 pts) : Très bon compromis en attendant le MULTi
+   - **VFF** (200 pts) : Minimum acceptable pour les films français
+   - Le système upgrade automatiquement vers le MULTi quand il apparaît
    
    **a) Créer les Custom Formats** (Settings → Custom Formats → Add) :
    
-   **Formats de Langue** :
-   - **MULTi** (Score: 100) - Priorité maximale
-     - Condition: Release Title → `\b(MULTi|MULTI)\b`
+   **Formats de Langue (l'essentiel)** :
    
-   - **French Audio** (Score: 50)
-     - Condition: Release Title → `\b(FRENCH|VFF|VFQ|VF2|TRUEFRENCH|VF)\b`
+   **1. MULTi** (Score: **1000**) - Priorité maximale
+   ```json
+   {
+     "name": "MULTi",
+     "includeCustomFormatWhenRenaming": true,
+     "specifications": [
+       {
+         "name": "Multi",
+         "implementation": "ReleaseTitleSpecification",
+         "negate": false,
+         "required": true,
+         "fields": {
+           "value": "\\b(Multi)(?![ ._-]?sub(s)?)(\\b|\\d)"
+         }
+       }
+     ]
+   }
+   ```
+   - Regex : `\b(Multi)(?![ ._-]?sub(s)?)(\b|\d)`
+   - Exclut "Multi-subs" (sous-titres seulement)
    
-   - **VOSTFR** (Score: 50)
-     - Condition: Release Title → `\b(VOSTFR|SUBFRENCH)\b`
+   **2. VOSTFR** (Score: **500**) - Excellent compromis
+   ```json
+   {
+     "name": "VOSTFR",
+     "includeCustomFormatWhenRenaming": true,
+     "specifications": [
+       {
+         "name": "VOSTFR",
+         "implementation": "ReleaseTitleSpecification",
+         "negate": false,
+         "required": false,
+         "fields": {
+           "value": "\\b(VOST.*?FR(E|A)?)\\b"
+         }
+       },
+       {
+         "name": "SUBFRENCH",
+         "implementation": "ReleaseTitleSpecification",
+         "negate": false,
+         "required": false,
+         "fields": {
+           "value": "\\b(SUBFR(A|ENCH)?)\\b"
+         }
+       }
+     ]
+   }
+   ```
+   - Regex 1 : `\b(VOST.*?FR(E|A)?)\b` (VOSTFR, VOSTFRE, VOSTFRA)
+   - Regex 2 : `\b(SUBFR(A|ENCH)?)\b` (SUBFRENCH, SUBFRA)
    
-   **Formats de Qualité Vidéo** :
-   - **x265/HEVC** (Score: 15) - Meilleure compression
-     - Condition: Release Title → `\b(x265|HEVC|h265)\b`
+   **3. VFF** (Score: **200**) - Minimum pour films français
+   ```json
+   {
+     "name": "VFF",
+     "includeCustomFormatWhenRenaming": true,
+     "specifications": [
+       {
+         "name": "FRENCH / TRUEFRENCH",
+         "implementation": "ReleaseTitleSpecification",
+         "negate": false,
+         "required": true,
+         "fields": {
+           "value": "\\b(TRUEFRENCH|VFF|FRENCH)\\b"
+         }
+       },
+       {
+         "name": "Not VF2",
+         "implementation": "ReleaseTitleSpecification",
+         "negate": true,
+         "required": true,
+         "fields": {
+           "value": "\\b(VF2|(VF(F|Q)[ .]VF(F|Q)))\\b"
+         }
+       }
+     ]
+   }
+   ```
+   - Regex : `\b(TRUEFRENCH|VFF|FRENCH)\b`
+   - Exclut VF2 (piste audio secondaire de moindre qualité)
    
-   - **Remux** (Score: 80) - Qualité Blu-ray originale
-     - Condition: Release Title → `\bREMUX\b`
+   **Formats Techniques (bonus)** :
    
-   - **BluRay** (Score: 30)
-     - Condition: Release Title → `\b(BluRay|Blu-ray|BD)\b`
+   - **x265/HEVC** (Score: **100**) - Meilleure compression, économie d'espace
+     - Regex : `\b(x265|HEVC|h265)\b`
    
-   - **HDR** (Score: 40)
-     - Condition: Release Title → `\b(HDR|HDR10)\b`
+   - **Freeleech** (Score: **40**) - Bonus pour trackers privés
+     - Condition : Indexer Flag → Freeleech
    
-   - **Dolby Vision** (Score: 50)
-     - Condition: Release Title → `\b(DV|DoVi|Dolby.Vision)\b`
+   - **Dolby Vision** (Score: **30**) - HDR avancé
+     - Regex : `\b(DV|DoVi|Dolby.?Vision)\b`
    
-   **Formats Audio Premium** :
-   - **Atmos** (Score: 25)
-     - Condition: Release Title → `\b(ATMOS|Atmos)\b`
+   - **HDR** (Score: **20**) - High Dynamic Range
+     - Regex : `\b(HDR|HDR10|HDR10\+)\b`
    
-   - **TrueHD** (Score: 20)
-     - Condition: Release Title → `\b(TrueHD|TRUE-HD)\b`
-   
-   - **DTS** (Score: 15)
-     - Condition: Release Title → `\b(DTS|DTS-HD|DTS-MA)\b`
+   - **Atmos** (Score: **15**) - Audio immersif
+     - Regex : `\b(ATMOS|Atmos)\b`
    
    **Formats à ÉVITER** (scores négatifs) :
-   - **YIFY** (Score: -100)
-     - Condition: Release Title → `\b(YIFY|YTS)\b`
    
-   - **CAM/TS** (Score: -200)
-     - Condition: Release Title → `\b(CAM|TS|TELESYNC|HDTS|PDVD|Screener|SCR)\b`
+   - **YIFY/YTS** (Score: **-100**) - Qualité vidéo très basse
+     - Regex : `\b(YIFY|YTS)\b`
    
-   **b) Appliquer à votre profil** (Settings → Profiles) :
-   - **Language** : `French` ou `Original`
-   - **Upgrade Until** : `Bluray-1080p` (ou 4K)
-   - **Upgrade Until Custom Format Score** : `100`
-   - **Minimum Custom Format Score Increment** : `1`
+   - **CAM/TS** (Score: **-200**) - Enregistrements cinéma
+     - Regex : `\b(CAM|TS|TELESYNC|HDTS|PDVD|Screener|SCR)\b`
    
-   Avec cette configuration, Radarr priorisera toujours les releases MULTi (VF+VO+VOSTFR) !
+   **b) Configuration du Quality Profile** (Settings → Profiles) :
+   
+   **Paramètres cruciaux** :
+   ```
+   Name: HD Rapide (ou votre nom)
+   Upgrade Until: Bluray-1080p (ou 2160p pour 4K)
+   Language: Any (IMPORTANT : ne pas filtrer par langue)
+   
+   Minimum Custom Format Score: 200 (accepte VFF minimum)
+   Upgrade Until Custom Format Score: 1000 (continue jusqu'au MULTi)
+   Minimum Custom Format Score Increment: 50 (évite upgrades mineurs)
+   ```
+   
+   **Custom Formats appliqués** :
+   ```
+   MULTi          : 1000
+   VOSTFR         : 500
+   VFF            : 200
+   x265/HEVC      : 100
+   Freeleech      : 40
+   Dolby Vision   : 30
+   HDR            : 20
+   Atmos          : 15
+   YIFY/YTS       : -100
+   CAM/TS         : -200
+   ```
+   
+   **📊 Comment ça fonctionne** :
+   
+   Exemple : Film américain F1 (2025)
+   1. **Jour 1** : Release WEB-DL anglais → Score 150 (HDR+x265) → Téléchargé (< 200 mais accepté)
+   2. **Jour 30** : Release VOSTFR → Score 500 → **Upgrade automatique**
+   3. **Jour 90** : Release MULTi Remux → Score 1160 (1000+100+30+20) → **Upgrade final, arrêt des recherches**
+   
+   Exemple : Film français Intouchables
+   - Release VFF 1080p → Score 200 (VFF) → Téléchargé et suffisant (pas de MULTi possible pour un film FR)
+   
+   **⚠️ IMPORTANT** :
+   - **Language = "Any"** : Ne mettez PAS "French" ou "Original", ça bloquerait certaines releases
+   - **Minimum Score = 200** : Le VFF est acceptable, pas besoin d'attendre
+   - **Upgrade Until = 1000** : Continue de chercher le MULTi
+   - **Increment = 50** : N'upgrade pas pour un simple bonus HDR (+20), seulement pour un changement significatif
+   
+   Avec cette configuration, Radarr gère automatiquement tous les cas : MULTi prioritaire, VOSTFR en backup, VFF pour films français !
+   
+   **c) Comment importer les Custom Formats** :
+   
+   Au lieu de créer manuellement chaque Custom Format, vous pouvez **importer les JSON** :
+   
+   1. **Radarr** → Settings → Custom Formats
+   2. Cliquez sur **Import** (en bas à gauche)
+   3. Collez le JSON d'un Custom Format (voir ci-dessus)
+   4. Cliquez **Import** → Le Custom Format est créé automatiquement
+   5. Répétez pour MULTi, VOSTFR, VFF, x265, etc.
+   6. N'oubliez pas d'aller dans **Settings → Profiles** pour attribuer les **scores** à chaque Custom Format
+
+5. **📏 Limiter la taille des fichiers** :
+
+   **Pourquoi ?** Éviter de télécharger des Remux 4K à 80 GB quand 15 GB suffisent pour du 1080p.
+   
+   **Méthode 1 : Via Quality Profile** (Recommandé)
+   
+   Settings → Profiles → Sélectionnez votre profil (ex: "HD-1080p") :
+   - **Upgrade Until** : `Bluray-1080p` (au lieu de `Bluray-2160p` ou `Remux-1080p`)
+   - Cela empêche Radarr de chercher des versions 4K ou Remux (très volumineuses)
+   
+   **Méthode 2 : Via Restrictions** (Plus précis)
+   
+   Settings → Indexers → **Restrictions** → Add :
+   ```
+   Name: Max Size 1080p
+   Maximum Size: 15000 (MB = 15 GB)
+   Tags: (vide = appliqué à tous les films)
+   ```
+   
+   Pour les films 4K :
+   ```
+   Name: Max Size 4K
+   Maximum Size: 40000 (MB = 40 GB)
+   Tags: 4k (créez un tag spécifique)
+   ```
+   
+   **Tailles recommandées** :
+   - **720p** : Max 8 GB
+   - **1080p** : Max 15 GB (recommandé pour la plupart des films)
+   - **1080p Remux** : Max 35 GB (qualité Blu-ray originale)
+   - **4K** : Max 40 GB
+   - **4K Remux** : Max 80 GB (pour les puristes)
+   
+   **Custom Format pour économiser de l'espace** :
+   
+   Privilégiez **x265/HEVC** (Score: +15) déjà créé plus haut :
+   - x265 offre 30-50% d'économie d'espace pour la même qualité que x264
+   - Exemple : Film en x264 = 12 GB, même film en x265 = 6-8 GB
+
+6. **🎬 Comment choisir entre VF et VO (Version Française / Version Originale)** :
+
+   **✅ Configuration actuelle : Releases MULTi (Recommandé)**
+   
+   Les releases **MULTi** contiennent plusieurs pistes audio dans un seul fichier :
+   - 🇫🇷 VF (Version Française)
+   - 🇬🇧 VO (Version Originale - généralement anglais)
+   - 📝 VOSTFR (Sous-titres français)
+   
+   **Avantage** : Un seul fichier à télécharger, vous changez la piste audio dans Plex !
+   
+   **a) Changer la piste audio dans Plex** :
+   - Lancez la lecture du film/série
+   - Cliquez sur l'icône **⚙️ Paramètres** (en bas à droite)
+   - Onglet **Audio** → Sélectionnez :
+     - `Français (VF)` pour la version française
+     - `English (VO)` pour la version originale
+   - Plex mémorise votre choix pour les prochaines lectures
+   
+   **b) Définir une langue par défaut dans Plex** :
+   - **Global** : Plex Web → **Paramètres** → **Compte** → **Langue audio par défaut**
+     - Choisissez : `Français`, `Original`, ou `Auto`
+   - **Par utilisateur** : Paramètres → **Utilisateurs** → Sélectionner → **Langue audio**
+   
+   **c) Vérifier qu'un film est MULTi** :
+   - Dans Radarr : Movies → Film → **Files** → Cherchez `MULTi` dans le nom
+   - Dans Plex : Film → **⋮** → **Obtenir les informations** → **Fichiers** → Section **Pistes audio**
+   - Commande rapide : `make check-audio` (puis entrez le nom du film)
+   
+   **d) Lister tous vos films MULTi** :
+   ```bash
+   make list-multi          # Liste tous les films avec plusieurs pistes audio
+   make count-languages     # Statistiques des langues audio
+   ```
+   
+   **e) Si vous voulez UNIQUEMENT des films en VF** (sans MULTi) :
+   - Settings → Custom Formats → Modifiez **French Audio** : Score `100`
+   - Settings → Custom Formats → Modifiez **MULTi** : Score `-50` (désactive MULTi)
+   - ⚠️ Vous perdrez la possibilité de basculer en VO !
+   
+   **f) Si vous voulez UNIQUEMENT des films en VO** (sans VF) :
+   - Settings → Custom Formats → Créez **English Only** (Score: 100)
+     - Condition: Release Title → `\b(ENGLISH|ENG)\b`
+   - Settings → Custom Formats → Modifiez **French Audio** : Score `-100`
+   - Settings → Custom Formats → Modifiez **MULTi** : Score `-100`
 
 ---
 
@@ -344,6 +646,22 @@ Une fois les conteneurs démarrés :
    **Release Profiles recommandés** :
    - **Must Contain** : `MULTi, FRENCH, VFF, VOSTFR` (séries françaises)
    - **Must Not Contain** : `YIFY, YTS, CAM, TS, HDCAM`
+
+5. **📏 Limiter la taille des fichiers (par épisode)** :
+   
+   Settings → Indexers → **Restrictions** → Add :
+   ```
+   Name: Max Size Episode 1080p
+   Maximum Size: 4000 (MB = 4 GB par épisode)
+   Tags: (vide)
+   ```
+   
+   **Tailles recommandées par épisode** :
+   - **720p** : Max 2 GB
+   - **1080p** : Max 4 GB
+   - **4K** : Max 10 GB
+   
+   **Note** : Les séries WEBDL (Netflix, Amazon) sont généralement bien compressées (2-3 GB/épisode).
 
 ---
 
@@ -666,31 +984,96 @@ Pour migrer vers un NAS (Synology, QNAP, etc.) :
 
 ## 🔍 Optimisation des Indexeurs (Vitesse & Qualité)
 
-### 📋 Indexeurs recommandés
+### 📋 Indexeurs recommandés (2026)
 
-**Tier 1 - Priorité maximale** :
-- **1337x** (Public) - Seeders ⭐⭐⭐⭐⭐ - Flaresolverr requis ✅
-- **TorrentGalaxy** (Public) - Seeders ⭐⭐⭐⭐⭐ - Flaresolverr requis ✅
-- **EZTV** (Public TV seul) - Seeders ⭐⭐⭐⭐ - Pas de Flaresolverr
+**⚠️ Note** : RARBG a fermé définitivement en mai 2023.
 
-**Tier 2 - Backup** :
-- **The Pirate Bay** - Flaresolverr requis ✅
-- **Torlock** - Flaresolverr requis ✅
-- **YTS** (films petite taille)
+**Tier 1 - Priorité maximale (contenu FR/MULTi)** :
+- **Torrent9** (Public FR) - Priority: 5 - Seeders ⭐⭐⭐⭐⭐ - Flaresolverr requis ✅
+- **YGGTorrent** (Semi-privé FR) - Priority: 3 - Seeders ⭐⭐⭐⭐⭐ - Seed Ratio 1.0 requis
+- **1337x** (Public) - Priority: 10 - Seeders ⭐⭐⭐⭐⭐ - Flaresolverr requis ✅
+
+**Tier 2 - Contenu international** :
+- **The Pirate Bay** - Priority: 15 - Flaresolverr requis ✅
+- **TorrentGalaxy** (Public) - Priority: 25 - Seeders ⭐⭐⭐⭐⭐ - Flaresolverr requis ✅
+- **EZTV** (Public TV seul) - Priority: 30 - Seeders ⭐⭐⭐⭐ - Pas de Flaresolverr
+
+**Tier 3 - Backup** :
+- **LimeTorrents** - Priority: 35 - Flaresolverr requis ✅
+- **Cpasbien** (FR) - Priority: 40 - Flaresolverr recommandé
+
+**⚠️ À éviter** :
+- **YTS/YIFY** - Qualité vidéo très basse (compression excessive)
 
 ### ⚙️ Configuration avancée Prowlarr
 
-**Trier par seeders** (pour chaque indexeur) :
+**Configuration complète d'un indexeur (exemple avec Torrent9)** :
 
-1. **Indexers** → Cliquez sur **1337x** → **Edit**
-2. **Priority** : `1` (priorité maximale)
-3. **Tags** : `flaresolverr` ⚠️ **OBLIGATOIRE**
-4. **Sort** : `seeders` (trier par seeders)
-5. **Order** : `desc` (décroissant)
+1. **Indexers** → Cliquez sur **Torrent9** → **Edit**
+2. **Indexer Priority** : `5` (1 = plus haute priorité, 50 = plus basse)
+   - Plus le chiffre est bas, plus Radarr privilégie cet indexeur en cas d'égalité
+3. **Minimum Seeders** : `5` (minimum de sources)
+4. **Seed Ratio** : (vide pour indexeurs publics)
+5. **Seed Time** : (vide pour indexeurs publics)
+6. **Multi Languages** : `English`, `French` (si disponible)
+7. **Tags** : `flaresolverr` ⚠️ **OBLIGATOIRE pour la plupart**
+8. **Enable RSS** : ✅ (surveillance nouveautés)
+9. **Enable Automatic Search** : ✅ (recherche auto)
+10. **Enable Interactive Search** : ✅ (recherche manuelle)
+11. **Replace MULTi by another language** : ❌ **DÉCOCHÉ** (important !)
+12. **Replace VOSTFR and SUBFRENCH** : ❌ **DÉCOCHÉ** (important !)
 
-**Minimum Seeders** :
-- Settings → Indexers → **Minimum Seeders** : `5`
-- Ignore les torrents avec <5 seeders
+**Comprendre "Indexer Priority"** :
+- Utilisé comme **tiebreaker** quand plusieurs releases sont équivalentes
+- Radarr utilise TOUS les indexeurs activés pour RSS et la recherche
+- Valeurs recommandées :
+  - `5` : Torrent9 (meilleur pour FR/MULTi)
+  - `10` : 1337x
+  - `15` : The Pirate Bay
+  - `25` : TorrentGalaxy
+  - `30` : EZTV (séries uniquement)
+  - `35` : LimeTorrents
+
+**Multi Languages - Explication** :
+Cette option dit à Prowlarr : "Quand cet indexeur propose un MULTi, accepte-le **seulement** s'il contient ces langues"
+- Exemple : Si vous sélectionnez `English` + `French`, seuls les MULTi avec VF + VO seront acceptés
+
+**Seed Ratio / Seed Time** :
+- **Indexeurs publics** : Laissez vide (pas de ratio obligatoire)
+- **Trackers privés** (YGG, etc.) : 
+  - Seed Ratio : `1.0` (partager autant que téléchargé)
+  - Seed Time : `72` heures (minimum 3 jours)
+
+**Global Minimum Seeders** :
+- Settings → Indexers → **Minimum Seeders** : `3`
+- Ignore les torrents avec moins de 3 sources (fichiers morts)
+
+---
+
+### 📊 Tableau récapitulatif - Configuration indexeurs
+
+| Indexeur | Priority | Min Seeds | Multi Lang | Tags | RSS | Auto | Interactive | Seed Ratio | Notes |
+|----------|----------|-----------|------------|------|-----|------|-------------|------------|-------|
+| **YGGTorrent** | 3 | 3 | EN + FR | - | ✅ | ✅ | ✅ | 1.0 | 🏆 Meilleur FR/MULTi |
+| **Torrent9** | 5 | 5 | - | flaresolverr | ✅ | ✅ | ✅ | - | 🇫🇷 Top FR/MULTi |
+| **1337x** | 10 | 10 | EN + FR | flaresolverr | ✅ | ✅ | ✅ | - | 🔥 Excellent MULTi |
+| **The Pirate Bay** | 15 | 10 | EN + FR | flaresolverr | ✅ | ✅ | ✅ | - | 🏴‍☠️ Gros catalogue |
+| **TorrentGalaxy** | 25 | 5 | EN + FR | flaresolverr | ✅ | ✅ | ✅ | - | Bon backup |
+| **EZTV** | 30 | 5 | EN | - | ✅ | ✅ | ✅ | - | 📺 TV uniquement |
+| **LimeTorrents** | 35 | 5 | EN + FR | flaresolverr | ✅ | ✅ | ✅ | - | Backup général |
+
+**Légende** :
+- **Priority** : Plus le chiffre est bas, plus l'indexeur est prioritaire (1-50)
+- **Multi Lang** : Langues à sélectionner dans "Multi Languages"
+- **Seed Ratio** : Ratio de partage obligatoire (trackers privés uniquement)
+- **`-`** : Non applicable ou laisser vide
+
+**⚠️ Rappel important** :
+- ❌ **NE JAMAIS COCHER** "Replace MULTi by another language" sur Torrent9 et indexeurs FR
+- ✅ **TOUJOURS AJOUTER** le tag `flaresolverr` pour les indexeurs protégés par Cloudflare
+- ✅ **CONFIGURER** "Multi Languages" avec `English` + `French` pour garantir VF+VO
+
+---
 
 ### 🎬 Profils Qualité Radarr
 
@@ -704,8 +1087,9 @@ Pour migrer vers un NAS (Synology, QNAP, etc.) :
    - ✅ Bluray-720p
    - ❌ DVD (décochez)
 4. **Custom Format Scores** :
-   - Créez un CF "High Seeders Groups" → Conditions : Release Title contains `RARBG|TGx|YTS|GalaxyRG`
-   - Score : `+100` (bonus de priorité)
+   - Créez un CF "High Seeders Groups" → Conditions : Release Title contains `TGx|GalaxyRG|YIFY|PSA|EVO`
+   - Score : `+100` (bonus de priorité pour groupes fiables)
+   - **Note** : YIFY est à éviter pour la qualité, mais a beaucoup de seeders
 
 **Tailles recommandées** :
 - Settings → Quality → Bluray-1080p :
@@ -852,23 +1236,64 @@ docker-compose restart qbittorrent
 
 ## ✅ Checklist de démarrage
 
+**🔧 Infrastructure** :
 - [ ] Docker Desktop installé et démarré
-- [ ] Script de nettoyage exécuté
+- [ ] Script de nettoyage exécuté (`./cleanup.sh`)
 - [ ] Structure `/Users/dev/data` créée
-- [ ] Clé privée NordVPN configurée dans `.env`
+- [ ] Fichier `.env` configuré avec credentials NordVPN
 - [ ] `docker-compose up -d` exécuté
-- [ ] VPN testé et fonctionnel
-- [ ] Prowlarr : Flaresolverr configuré avec tag `flaresolverr`
-- [ ] Prowlarr : 1337x + TorrentGalaxy avec tag `flaresolverr`
-- [ ] Prowlarr : EZTV ajouté (séries)
-- [ ] Prowlarr : Minimum Seeders = `5`
-- [ ] qBittorrent : Host validation désactivée
-- [ ] qBittorrent : Max connections = 500
-- [ ] Radarr : Root folder + Download client configurés
-- [ ] Radarr : Profile "HD Rapide" créé (5-25GB)
-- [ ] Radarr : Custom Format "High Seeders" créé
-- [ ] Sonarr : Root folder + Download client configurés
-- [ ] Sonarr : Profile "HD Séries" créé (1-4GB/épisode)
+- [ ] VPN testé et fonctionnel (`make vpn-check`)
+
+**🔍 Prowlarr - Indexeurs** :
+- [ ] Flaresolverr configuré (`http://flaresolverr:8191`, tag: `flaresolverr`)
+- [ ] YGGTorrent installé (`./install-ygg.sh`) avec Passkey
+- [ ] Torrent9 ajouté (Priority: 5, Tags: `flaresolverr`)
+- [ ] 1337x ajouté (Priority: 10, Tags: `flaresolverr`, Multi Languages: EN+FR)
+- [ ] The Pirate Bay ajouté (Priority: 15, Tags: `flaresolverr`, Multi Languages: EN+FR)
+- [ ] TorrentGalaxy ajouté (Priority: 25, Tags: `flaresolverr`)
+- [ ] EZTV ajouté (Priority: 30, pas de tag)
+- [ ] Global Minimum Seeders = `3` (Settings → Indexers)
+- [ ] ⚠️ "Replace MULTi by another language" = DÉCOCHÉ sur tous les indexeurs FR
+- [ ] Apps configurées (Radarr + Sonarr synchronisés)
+
+**📥 qBittorrent** :
+- [ ] Mot de passe changé (défaut récupéré dans les logs)
+- [ ] Host validation désactivée (Web UI → Options)
+- [ ] Chemins configurés (`/data/downloads/complete` et `/incomplete`)
+- [ ] Max connections = 500
+
+**🎬 Radarr** :
+- [ ] Root folder : `/data/media/movies`
+- [ ] Download client : `gluetun:8090` configuré
+- [ ] Custom Format "MULTi" créé (Score: **1000**)
+- [ ] Custom Format "VOSTFR" créé (Score: **500**)
+- [ ] Custom Format "VFF" créé (Score: **200**)
+- [ ] Custom Format "x265/HEVC" créé (Score: 100)
+- [ ] Quality Profile configuré : 
+  - Language = **Any** (pas French/Original)
+  - Minimum Custom Format Score = **200**
+  - Upgrade Until Custom Format Score = **1000**
+  - Minimum Custom Format Score Increment = **50**
+- [ ] Restriction de taille : Max 15000 MB (15 GB) pour 1080p (optionnel)
+- [ ] **Au moins un indexeur français** (Torrent9 OU YGGTorrent) configuré
+
+**📺 Sonarr** :
+- [ ] Root folder : `/data/media/tv`
+- [ ] Download client : `gluetun:8090` configuré
+- [ ] Custom Formats identiques à Radarr (MULTi 1000, VOSTFR 500, VFF 200)
+- [ ] Quality Profile avec mêmes paramètres que Radarr
+- [ ] Restriction de taille : Max 4000 MB (4 GB) par épisode (optionnel)
+
+**🎭 Plex** :
+- [ ] Bibliothèques ajoutées (Films + Séries)
+- [ ] Langue audio par défaut : `Français` ou `Original`
+- [ ] Remote Access activé (Settings → Remote Access)
+
+**🎯 Tests finaux** :
+- [ ] Test VPN : `make vpn-check` (IP différente de votre IP publique)
+- [ ] Test download : Ajouter un film dans Radarr → Vérifier download
+- [ ] Test Plex : Film téléchargé → Visible dans Plex avec pistes VF + VO
+- [ ] Test changement de langue : Plex → ⚙️ → Audio → Basculer VF ⇄ VO
 - [ ] Plex : Remote Access activé
 - [ ] Plex Watchlist configurée (Radarr + Sonarr)
 - [ ] Test : Film ajouté à Watchlist → Téléchargé automatiquement ✅
