@@ -111,6 +111,7 @@ stop: ## Arrêter tous les services
 restart: ## Redémarrer tous les services
 	@echo "$(YELLOW)🔄 Redémarrage de tous les services...$(NC)"
 	@$(COMPOSE) restart
+	@sleep 15
 	@echo "$(GREEN)✅ Services redémarrés$(NC)"
 
 status: ## État des services

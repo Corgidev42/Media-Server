@@ -204,6 +204,52 @@ services:
       - media-network
     restart: unless-stopped
 
+  #============================================================================
+  # PostgreSQL - Base de données pour MediaTracker
+  #============================================================================
+  mediatracker-db:
+    image: postgres:16-alpine
+    container_name: mediatracker-db
+    environment:
+      - POSTGRES_USER=mediatracker
+      - POSTGRES_PASSWORD=${MEDIATRACKER_DB_PASSWORD}
+      - POSTGRES_DB=mediatracker
+      - TZ=${TZ}
+    volumes:
+      - mediatracker_db:/var/lib/postgresql/data
+    networks:
+      - media-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mediatracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #============================================================================
+  # MediaTracker - Suivi de vos médias (films, séries, jeux, livres)
+  # Interface: http://localhost:7481
+  # Intégration avec Plex, Radarr, Sonarr
+  #============================================================================
+  mediatracker:
+    image: ghcr.io/bonukai/mediatracker:latest
+    container_name: mediatracker
+    ports:
+      - "7481:7481"
+    environment:
+      - TZ=${TZ}
+      - SERVER_LANG=fr
+      - DATABASE_URL=postgres://mediatracker:${MEDIATRACKER_DB_PASSWORD}@mediatracker-db:5432/mediatracker
+      - TMDB_LANG=fr
+    volumes:
+      - mediatracker_config:/storage
+    networks:
+      - media-network
+    depends_on:
+      mediatracker-db:
+        condition: service_healthy
+    restart: unless-stopped
+
 #==============================================================================
 # Volumes Docker (configurations persistantes)
 #==============================================================================

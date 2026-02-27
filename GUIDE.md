@@ -146,7 +146,7 @@ Une fois les conteneurs démarrés :
 | Radarr        | http://localhost:7878      | 7878  |
 | Sonarr        | http://localhost:8989      | 8989  |
 | Seerr         | http://localhost:5055      | 5055  |
-| qBittorrent   | http://localhost:8090      | 8090  |
+| qBittorrent   | http://localho`st:8090      | 8090  |
 | Flaresolverr  | http://localhost:8191      | 8191  |
 | Plex          | http://localhost:32400/web | 32400 |
 
