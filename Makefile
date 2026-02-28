@@ -44,6 +44,9 @@ help: ## Affiche l'aide
 	@echo "  make logs-plex          - Logs Plex"
 	@echo "  make logs-gluetun       - Logs VPN"
 	@echo "  make logs-seerr         - Logs Seerr"
+	@echo "  make logs-tautulli      - Logs Tautulli"
+	@echo "  make logs-plextraktsync - Logs PlexTraktSync"
+	@echo "  make logs-recyclarr     - Logs Recyclarr"
 	@echo ""
 	@echo "$(YELLOW)🔄 MISE À JOUR :$(NC)"
 	@echo "  make update             - Mettre à jour tous les services"
@@ -51,6 +54,9 @@ help: ## Affiche l'aide
 	@echo "  make update-sonarr      - Mettre à jour Sonarr uniquement"
 	@echo "  make update-plex        - Mettre à jour Plex uniquement"
 	@echo "  make update-seerr       - Mettre à jour Seerr uniquement"
+	@echo "  make update-tautulli    - Mettre à jour Tautulli uniquement"
+	@echo "  make update-plextraktsync - Mettre à jour PlexTraktSync uniquement"
+	@echo "  make update-recyclarr   - Mettre à jour Recyclarr uniquement"
 	@echo ""
 	@echo "$(YELLOW)📂 BACKUP & RESTORE :$(NC)"
 	@echo "  make backup-all         - Sauvegarder toutes les configs"
@@ -89,6 +95,13 @@ help: ## Affiche l'aide
 	@echo "  make check-audio        - Vérifier les pistes audio d'un film"
 	@echo "  make list-multi         - Lister les films MULTi (VF+VO)"
 	@echo "  make count-languages    - Compter les films par langue"
+	@echo ""
+	@echo "$(YELLOW) CONFIGURATION :$(NC)"
+	@echo "  make setup              - Installation automatique complète"
+	@echo "  make export             - Exporter configuration actuelle"
+	@echo "  make import             - Importer configuration sauvegardée"
+	@echo "  make restore            - Restauration complète → import + recyclarr sync"
+	@echo "  make package            - Créer archive à partager"
 	@echo ""
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
 
@@ -160,6 +173,18 @@ logs-seerr: ## Logs Seerr
 	@echo "$(BLUE)🎫 Logs Seerr (Ctrl+C pour quitter)$(NC)"
 	@docker logs -f seerr --tail=100
 
+logs-tautulli: ## Logs Tautulli
+	@echo "$(BLUE)📊 Logs Tautulli (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f tautulli --tail=100
+
+logs-plextraktsync: ## Logs PlexTraktSync
+	@echo "$(BLUE)🔄 Logs PlexTraktSync (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f plextraktsync --tail=100
+
+logs-recyclarr: ## Logs Recyclarr
+	@echo "$(BLUE)♻️ Logs Recyclarr (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f recyclarr --tail=100
+
 logs-flaresolverr: ## Logs Flaresolverr
 	@echo "$(BLUE)🔥 Logs Flaresolverr (Ctrl+C pour quitter)$(NC)"
 	@docker logs -f flaresolverr --tail=100
@@ -205,6 +230,24 @@ update-seerr: ## Mettre à jour Seerr
 	@$(COMPOSE) up -d seerr
 	@echo "$(GREEN)✅ Seerr mis à jour$(NC)"
 
+update-tautulli: ## Mettre à jour Tautulli
+	@echo "$(YELLOW)📦 Mise à jour de Tautulli...$(NC)"
+	@$(COMPOSE) pull tautulli
+	@$(COMPOSE) up -d tautulli
+	@echo "$(GREEN)✅ Tautulli mis à jour$(NC)"
+
+update-plextraktsync: ## Mettre à jour PlexTraktSync
+	@echo "$(YELLOW)📦 Mise à jour de PlexTraktSync...$(NC)"
+	@$(COMPOSE) pull plextraktsync
+	@$(COMPOSE) up -d plextraktsync
+	@echo "$(GREEN)✅ PlexTraktSync mis à jour$(NC)"
+
+update-recyclarr: ## Mettre à jour Recyclarr
+	@echo "$(YELLOW)📦 Mise à jour de Recyclarr...$(NC)"
+	@$(COMPOSE) pull recyclarr
+	@$(COMPOSE) up -d recyclarr
+	@echo "$(GREEN)✅ Recyclarr mis à jour$(NC)"
+
 update-qbit: ## Mettre à jour qBittorrent
 	@echo "$(YELLOW)📦 Mise à jour de qBittorrent...$(NC)"
 	@$(COMPOSE) pull qbittorrent
@@ -221,7 +264,7 @@ update-gluetun: ## Mettre à jour Gluetun
 # BACKUP & RESTORE
 # ============================================================================
 
-backup-all: backup-radarr backup-sonarr backup-prowlarr backup-plex backup-qbit backup-seerr ## Sauvegarder tout
+backup-all: backup-radarr backup-sonarr backup-prowlarr backup-plex backup-qbit backup-seerr backup-tautulli backup-plextraktsync backup-recyclarr ## Sauvegarder tout
 	@echo "$(GREEN)✅ Sauvegarde complète terminée dans $(BACKUP_DIR)/$(NC)"
 	@ls -lh $(BACKUP_DIR)
 
@@ -260,6 +303,24 @@ backup-seerr: ## Sauvegarder Seerr
 	@mkdir -p $(BACKUP_DIR)
 	@docker run --rm -v seerr_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/seerr_$(TIMESTAMP).tar.gz /data
 	@echo "$(GREEN)✅ Seerr sauvegardé : $(BACKUP_DIR)/seerr_$(TIMESTAMP).tar.gz$(NC)"
+
+backup-tautulli: ## Sauvegarder Tautulli
+	@echo "$(YELLOW)💾 Sauvegarde de Tautulli...$(NC)"
+	@mkdir -p $(BACKUP_DIR)
+	@docker run --rm -v tautulli_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/tautulli_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ Tautulli sauvegardé : $(BACKUP_DIR)/tautulli_$(TIMESTAMP).tar.gz$(NC)"
+
+backup-plextraktsync: ## Sauvegarder PlexTraktSync
+	@echo "$(YELLOW)💾 Sauvegarde de PlexTraktSync...$(NC)"
+	@mkdir -p $(BACKUP_DIR)
+	@tar czf $(BACKUP_DIR)/plextraktsync_$(TIMESTAMP).tar.gz plextraktsync/
+	@echo "$(GREEN)✅ PlexTraktSync sauvegardé : $(BACKUP_DIR)/plextraktsync_$(TIMESTAMP).tar.gz$(NC)"
+
+backup-recyclarr: ## Sauvegarder Recyclarr
+	@echo "$(YELLOW)💾 Sauvegarde de Recyclarr...$(NC)"
+	@mkdir -p $(BACKUP_DIR)
+	@tar czf $(BACKUP_DIR)/recyclarr_$(TIMESTAMP).tar.gz recyclarr/
+	@echo "$(GREEN)✅ Recyclarr sauvegardé : $(BACKUP_DIR)/recyclarr_$(TIMESTAMP).tar.gz$(NC)"
 
 restore-radarr: ## Restaurer Radarr (make restore-radarr FILE=radarr_20240224.tar.gz)
 	@echo "$(YELLOW)📥 Restauration de Radarr depuis $(FILE)...$(NC)"
@@ -550,6 +611,83 @@ count-languages: ## Compter les films par langue
 	echo "$(GREEN)🌍 Films MULTi (VF+VO)  : $$multi$(NC)"; \
 	echo "$(YELLOW)🗣️  Films mono-langue    : $$single$(NC)"; \
 	echo ""
+
+# ============================================================================
+# CONFIGURATION - Setup et gestion
+# ============================================================================
+
+setup: ## Installation automatique complète
+	@./scripts/setup.sh
+
+export: ## Exporter configuration actuelle
+	@./scripts/export-config.sh
+
+import: ## Importer configuration sauvegardée
+	@./scripts/import-config.sh
+
+restore: ## Restauration complète (export → clean → import → recyclarr sync)
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  🔄 Restauration complète de la configuration$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "$(YELLOW)1. Import via API (Radarr/Sonarr naming & mediamanagement)...$(NC)"
+	@./scripts/import-config.sh
+	@echo ""
+	@echo "$(YELLOW)2. Sync Recyclarr (TRaSH Guides custom formats & profiles)...$(NC)"
+	@$(COMPOSE) exec recyclarr recyclarr state repair --adopt 2>/dev/null || true
+	@$(COMPOSE) exec recyclarr recyclarr sync
+	@echo ""
+	@echo "$(GREEN)✅ Restauration complète terminée !$(NC)"
+	@echo ""
+	@echo "$(YELLOW)📋 Services restaurés :$(NC)"
+	@echo "  ✓ Radarr: Custom Formats + Quality Profiles"
+	@echo "  ✓ Sonarr: Custom Formats + Quality Profiles"
+	@echo "  ⊘ Prowlarr: Indexers doivent être reconfigurés manuellement"
+
+package: ## Créer archive complète
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  📦 Création d'une archive de configuration$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "$(YELLOW)📤 Export de la configuration en cours...$(NC)"
+	@./scripts/export-config.sh
+	@echo ""
+	@echo "$(YELLOW)📦 Création de l'archive...$(NC)"
+	@tar -czf media-server-config-$(TIMESTAMP).tar.gz \
+		docker-compose.yml \
+		.env.example \
+		config-exports/ \
+		config-templates/ \
+		recyclarr/recyclarr.yml recyclarr/settings.yml \
+		plextraktsync/ \
+		scripts/ \
+		prowlarr/ radarr/ sonarr/ \
+		Makefile \
+		README.md \
+		2>/dev/null || true
+	@echo "$(GREEN)✅ Archive créée : media-server-config-$(TIMESTAMP).tar.gz$(NC)"
+	@echo ""
+	@echo "$(YELLOW)📋 Contenu de l'archive :$(NC)"
+	@tar -tzf media-server-config-$(TIMESTAMP).tar.gz | head -20
+	@echo ""
+	@echo "$(GREEN)🎉 Archive prête à partager !$(NC)"
+	@ls -lh media-server-config-$(TIMESTAMP).tar.gz
+
+show-api-keys: ## Afficher toutes les API keys
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)  🔑 API Keys des services$(NC)"
+	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Prowlarr :$(NC)"
+	@docker exec prowlarr cat /config/config.xml 2>/dev/null | grep -oP '<ApiKey>\K[^<]+' || echo "  $(RED)❌ Non trouvée$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Radarr :$(NC)"
+	@docker exec radarr cat /config/config.xml 2>/dev/null | grep -oP '<ApiKey>\K[^<]+' || echo "  $(RED)❌ Non trouvée$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Sonarr :$(NC)"
+	@docker exec sonarr cat /config/config.xml 2>/dev/null | grep -oP '<ApiKey>\K[^<]+' || echo "  $(RED)❌ Non trouvée$(NC)"
+	@echo ""
+	@echo "$(GREEN)💡 Ajoutez ces clés dans votre fichier .env$(NC)"
 
 # Default target
 .DEFAULT_GOAL := help

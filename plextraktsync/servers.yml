@@ -1,0 +1,25 @@
+servers:
+  Media Server Mac:
+    token: 1jNbYKgLEffgGrGos93K
+    urls:
+    - https://172-20-0-2.1e62890c87cf4ae28e7bafd58c15257e.plex.direct:32400
+    - http://172.20.0.2:32400
+    - https://90-90-20-47.1e62890c87cf4ae28e7bafd58c15257e.plex.direct:32400
+    - http://90.90.20.47:32400
+    - https://139-162-242-214.1e62890c87cf4ae28e7bafd58c15257e.plex.direct:8443
+    - http://139.162.242.214:8443
+    - http://192.168.65.254:32400
+    - http://plex:32400
+    id: 4ee9fc6a57831433e9b80e35553d66f1ae3482e7
+    config:
+      sync:
+        plex_to_trakt:
+          watched_status: true
+          ratings: true
+          collection: true
+          watchlist: true
+        trakt_to_plex:
+          watched_status: true
+          ratings: true
+          watchlist: true
+          liked_lists: true

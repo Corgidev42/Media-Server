@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/latest/config-schema.json
+# Recyclarr Configuration - TRaSH Guides Automated Sync
+# Documentation: https://recyclarr.dev/
+
+# Radarr - Movie Management with TRaSH Guides
+radarr:
+  movies:
+    base_url: !env_var RADARR_URL
+    api_key: !env_var RADARR_API_KEY
+    
+    # Define movie quality sizes from TRaSH Guide
+    quality_definition:
+      type: movie
+    
+    # Multiple quality profiles from TRaSH Guides
+    quality_profiles:
+      # HD 1080p Bluray + WEB
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9  # HD Bluray + WEB
+        reset_unmatched_scores:
+          enabled: true
+      
+      # 4K UHD Bluray + WEB
+      - trash_id: 64fb5f9858489bdac2af690e27c8f42f  # UHD Bluray + WEB (4K)
+        name: UHD Bluray + WEB (4K)
+        reset_unmatched_scores:
+          enabled: true
+    
+    # Language preferences (MULTi + Original + French)
+    custom_formats:
+      - trash_ids:
+          - 0542a48746585dc4444bbbb8a6bdf6ea  # Language: Original + French
+          - 4b900e171accbfb172729b63323ea8ca  # MULTi
+        assign_scores_to:
+          - name: HD Bluray + WEB
+            score: 1000
+          - name: UHD Bluray + WEB (4K)
+            score: 1000
+
+# Sonarr - TV Series Management with TRaSH Guides
+sonarr:
+  tv:
+    base_url: !env_var SONARR_URL
+    api_key: !env_var SONARR_API_KEY
+    
+    # Define series quality sizes from TRaSH Guide
+    quality_definition:
+      type: series
+    
+    # TV quality profiles from TRaSH Guides
+    quality_profiles:
+      # Web 1080p (Primary profile for HD TV)
+      - trash_id: 72dae194fc92bf828f32cde7744e51a1  # WEB-1080p
+        reset_unmatched_scores:
+          enabled: true
+    
+    # Language preferences (MULTi + Original + French)
+    custom_formats:
+      - trash_ids:
+          - 10e77b96ae4770a7de645a91a53ce29a  # Language: Original + French
+          - 7ba05c6e0e14e793538174c679126996  # MULTi
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 1000
