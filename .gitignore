@@ -1,15 +1,57 @@
-# Fichiers à ignorer
+# ======================
+# Systeme
+# ======================
 .DS_Store
+*.log
+*.bak
+*.tmp
+/tmp/
+*-response.json
+
+# ======================
+# Secrets (NE PAS COMMIT)
+# ======================
 .env
 .env.local
-*.log
+.env.*.local
 
-# Sauvegardes
+# ======================
+# Backups & Archives
+# ======================
 *.tar.gz
 *.zip
-backup/
+backups/
 
-# Données locales (ne pas versionner)
+# ======================
+# Donnees locales
+# ======================
 data/
 downloads/
 media/
+
+# ======================
+# Recyclarr (garder seulement recyclarr.yml + settings.yml)
+# ======================
+recyclarr/logs/
+recyclarr/state/
+recyclarr/resources/
+recyclarr/configs/
+recyclarr/includes/
+recyclarr/.cache/
+
+# ======================
+# PlexTraktSync (garder seulement config.yml + servers.yml)
+# ======================
+plextraktsync/.plex*.db*
+plextraktsync/.pytrakt.json
+plextraktsync/*.log
+plextraktsync/*.sqlite
+plextraktsync/__pycache__/
+plextraktsync/.env
+
+# ======================
+# Artefacts de test / doublons
+# ======================
+.backup-exports/
+config-exports-clean/
+test-backup/
