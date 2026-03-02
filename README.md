@@ -1,6 +1,6 @@
 # Media Server Stack
 
-Stack Docker automatisee : Plex + Radarr + Sonarr + Prowlarr + qBittorrent + VPN
+Stack Docker automatisee : Jellyfin + Radarr + Sonarr + Prowlarr + qBittorrent + VPN
 
 ---
 
@@ -24,16 +24,14 @@ make setup
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Plex | 32400 | http://localhost:32400/web |
+| Jellyfin | 8096 | http://localhost:8096 (Lecture multimedia) |
 | Radarr | 7878 | http://localhost:7878 (Films) |
 | Sonarr | 8989 | http://localhost:8989 (Series) |
 | Prowlarr | 9696 | http://localhost:9696 (Indexeurs) |
 | qBittorrent | 8090 | http://localhost:8090 (via VPN) |
-| Seerr | 5055 | http://localhost:5055 (Requetes) |
-| Tautulli | 8181 | http://localhost:8181 (Stats Plex) |
-| Jackett | 9117 | http://localhost:9117 (Indexeurs alt.) |
+| Jellyseerr | 5055 | http://localhost:5055 (Requetes) |
+| Jellystat | 3000 | http://localhost:3000 (Stats Jellyfin) |
 | Flaresolverr | 8191 | http://localhost:8191 (Anti-Cloudflare) |
-| PlexTraktSync | - | Sync Plex <-> Trakt.tv |
 | Recyclarr | - | TRaSH Guides auto-sync |
 
 ---
@@ -81,7 +79,7 @@ make import
 2. **qBittorrent** - Desactiver "Host header validation"
 3. **Radarr** - Root `/data/media/movies` + Download client `gluetun:8090`
 4. **Sonarr** - Root `/data/media/tv` + Download client `gluetun:8090`
-5. **Plex** - Ajouter bibliotheques
+5. **Jellyfin** - Ajouter bibliotheques (fait automatiquement par setup.sh)
 
 Puis sauvegarder :
 ```bash
@@ -140,10 +138,6 @@ Media-Server/
 ├── recyclarr/               # TRaSH Guides (quality profiles, custom formats)
 │   ├── recyclarr.yml        # Config principale
 │   └── settings.yml         # Settings
-│
-├── plextraktsync/           # Sync Plex <-> Trakt.tv
-│   ├── config.yml
-│   └── servers.yml
 │
 └── backups/                 # Archives tar.gz des volumes Docker
 ```

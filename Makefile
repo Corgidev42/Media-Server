@@ -1,5 +1,5 @@
 # ============================================================================
-# Makefile - Stack Media Server (Servarr + Plex + VPN)
+# Makefile - Stack Media Server (Jellyfin + Servarr + VPN)
 # ============================================================================
 # Usage: make <command>
 # Exemple: make start, make logs-radarr, make backup-all
@@ -41,21 +41,19 @@ help: ## Affiche l'aide
 	@echo "  make logs-sonarr        - Logs Sonarr (séries)"
 	@echo "  make logs-prowlarr      - Logs Prowlarr (indexeurs)"
 	@echo "  make logs-qbit          - Logs qBittorrent"
-	@echo "  make logs-plex          - Logs Plex"
+	@echo "  make logs-jellyfin      - Logs Jellyfin"
 	@echo "  make logs-gluetun       - Logs VPN"
-	@echo "  make logs-seerr         - Logs Seerr"
-	@echo "  make logs-tautulli      - Logs Tautulli"
-	@echo "  make logs-plextraktsync - Logs PlexTraktSync"
+	@echo "  make logs-jellyseerr    - Logs Jellyseerr"
+	@echo "  make logs-jellystat     - Logs Jellystat"
 	@echo "  make logs-recyclarr     - Logs Recyclarr"
 	@echo ""
 	@echo "$(YELLOW)🔄 MISE À JOUR :$(NC)"
 	@echo "  make update             - Mettre à jour tous les services"
 	@echo "  make update-radarr      - Mettre à jour Radarr uniquement"
 	@echo "  make update-sonarr      - Mettre à jour Sonarr uniquement"
-	@echo "  make update-plex        - Mettre à jour Plex uniquement"
-	@echo "  make update-seerr       - Mettre à jour Seerr uniquement"
-	@echo "  make update-tautulli    - Mettre à jour Tautulli uniquement"
-	@echo "  make update-plextraktsync - Mettre à jour PlexTraktSync uniquement"
+	@echo "  make update-jellyfin    - Mettre à jour Jellyfin uniquement"
+	@echo "  make update-jellyseerr  - Mettre à jour Jellyseerr uniquement"
+	@echo "  make update-jellystat   - Mettre à jour Jellystat uniquement"
 	@echo "  make update-recyclarr   - Mettre à jour Recyclarr uniquement"
 	@echo ""
 	@echo "$(YELLOW)📂 BACKUP & RESTORE :$(NC)"
@@ -63,7 +61,7 @@ help: ## Affiche l'aide
 	@echo "  make backup-radarr      - Sauvegarder Radarr"
 	@echo "  make backup-sonarr      - Sauvegarder Sonarr"
 	@echo "  make backup-prowlarr    - Sauvegarder Prowlarr"
-	@echo "  make backup-plex        - Sauvegarder Plex"
+	@echo "  make backup-jellyfin   - Sauvegarder Jellyfin"
 	@echo "  make restore-radarr     - Restaurer Radarr"
 	@echo "  make restore-sonarr     - Restaurer Sonarr"
 	@echo "  make list-backups       - Liste des sauvegardes"
@@ -87,7 +85,7 @@ help: ## Affiche l'aide
 	@echo "  make health             - État de santé des services"
 	@echo ""
 	@echo "$(YELLOW)🎬 MEDIA :$(NC)"
-	@echo "  make media-scan         - Forcer scan Plex"
+	@echo "  make media-scan         - Forcer scan Jellyfin"
 	@echo "  make media-stats        - Statistiques média"
 	@echo "  make test-download      - Tester un téléchargement"
 	@echo ""
@@ -161,25 +159,21 @@ logs-qbit: ## Logs qBittorrent
 	@echo "$(BLUE)📥 Logs qBittorrent (Ctrl+C pour quitter)$(NC)"
 	@docker logs -f qbittorrent --tail=100
 
-logs-plex: ## Logs Plex
-	@echo "$(BLUE)🎬 Logs Plex (Ctrl+C pour quitter)$(NC)"
-	@docker logs -f plex --tail=100
+logs-jellyfin: ## Logs Jellyfin
+	@echo "$(BLUE)🎬 Logs Jellyfin (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f jellyfin --tail=100
 
 logs-gluetun: ## Logs VPN
 	@echo "$(BLUE)🔐 Logs Gluetun VPN (Ctrl+C pour quitter)$(NC)"
 	@docker logs -f gluetun --tail=100
 
-logs-seerr: ## Logs Seerr
-	@echo "$(BLUE)🎫 Logs Seerr (Ctrl+C pour quitter)$(NC)"
-	@docker logs -f seerr --tail=100
+logs-jellyseerr: ## Logs Jellyseerr
+	@echo "$(BLUE)🎫 Logs Jellyseerr (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f jellyseerr --tail=100
 
-logs-tautulli: ## Logs Tautulli
-	@echo "$(BLUE)📊 Logs Tautulli (Ctrl+C pour quitter)$(NC)"
-	@docker logs -f tautulli --tail=100
-
-logs-plextraktsync: ## Logs PlexTraktSync
-	@echo "$(BLUE)🔄 Logs PlexTraktSync (Ctrl+C pour quitter)$(NC)"
-	@docker logs -f plextraktsync --tail=100
+logs-jellystat: ## Logs Jellystat
+	@echo "$(BLUE)📊 Logs Jellystat (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f jellystat --tail=100
 
 logs-recyclarr: ## Logs Recyclarr
 	@echo "$(BLUE)♻️ Logs Recyclarr (Ctrl+C pour quitter)$(NC)"
@@ -218,29 +212,23 @@ update-prowlarr: ## Mettre à jour Prowlarr
 	@$(COMPOSE) up -d prowlarr
 	@echo "$(GREEN)✅ Prowlarr mis à jour$(NC)"
 
-update-plex: ## Mettre à jour Plex
-	@echo "$(YELLOW)📦 Mise à jour de Plex...$(NC)"
-	@$(COMPOSE) pull plex
-	@$(COMPOSE) up -d plex
-	@echo "$(GREEN)✅ Plex mis à jour$(NC)"
+update-jellyfin: ## Mettre à jour Jellyfin
+	@echo "$(YELLOW)📦 Mise à jour de Jellyfin...$(NC)"
+	@$(COMPOSE) pull jellyfin
+	@$(COMPOSE) up -d jellyfin
+	@echo "$(GREEN)✅ Jellyfin mis à jour$(NC)"
 
-update-seerr: ## Mettre à jour Seerr
-	@echo "$(YELLOW)📦 Mise à jour de Seerr...$(NC)"
-	@$(COMPOSE) pull seerr
-	@$(COMPOSE) up -d seerr
-	@echo "$(GREEN)✅ Seerr mis à jour$(NC)"
+update-jellyseerr: ## Mettre à jour Jellyseerr
+	@echo "$(YELLOW)📦 Mise à jour de Jellyseerr...$(NC)"
+	@$(COMPOSE) pull jellyseerr
+	@$(COMPOSE) up -d jellyseerr
+	@echo "$(GREEN)✅ Jellyseerr mis à jour$(NC)"
 
-update-tautulli: ## Mettre à jour Tautulli
-	@echo "$(YELLOW)📦 Mise à jour de Tautulli...$(NC)"
-	@$(COMPOSE) pull tautulli
-	@$(COMPOSE) up -d tautulli
-	@echo "$(GREEN)✅ Tautulli mis à jour$(NC)"
-
-update-plextraktsync: ## Mettre à jour PlexTraktSync
-	@echo "$(YELLOW)📦 Mise à jour de PlexTraktSync...$(NC)"
-	@$(COMPOSE) pull plextraktsync
-	@$(COMPOSE) up -d plextraktsync
-	@echo "$(GREEN)✅ PlexTraktSync mis à jour$(NC)"
+update-jellystat: ## Mettre à jour Jellystat
+	@echo "$(YELLOW)📦 Mise à jour de Jellystat...$(NC)"
+	@$(COMPOSE) pull jellystat
+	@$(COMPOSE) up -d jellystat
+	@echo "$(GREEN)✅ Jellystat mis à jour$(NC)"
 
 update-recyclarr: ## Mettre à jour Recyclarr
 	@echo "$(YELLOW)📦 Mise à jour de Recyclarr...$(NC)"
@@ -264,7 +252,7 @@ update-gluetun: ## Mettre à jour Gluetun
 # BACKUP & RESTORE
 # ============================================================================
 
-backup-all: backup-radarr backup-sonarr backup-prowlarr backup-plex backup-qbit backup-seerr backup-tautulli backup-plextraktsync backup-recyclarr ## Sauvegarder tout
+backup-all: backup-radarr backup-sonarr backup-prowlarr backup-jellyfin backup-qbit backup-jellyseerr backup-jellystat backup-recyclarr ## Sauvegarder tout
 	@echo "$(GREEN)✅ Sauvegarde complète terminée dans $(BACKUP_DIR)/$(NC)"
 	@ls -lh $(BACKUP_DIR)
 
@@ -286,11 +274,11 @@ backup-prowlarr: ## Sauvegarder Prowlarr
 	@docker run --rm -v prowlarr_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/prowlarr_$(TIMESTAMP).tar.gz /data
 	@echo "$(GREEN)✅ Prowlarr sauvegardé : $(BACKUP_DIR)/prowlarr_$(TIMESTAMP).tar.gz$(NC)"
 
-backup-plex: ## Sauvegarder Plex
-	@echo "$(YELLOW)💾 Sauvegarde de Plex...$(NC)"
+backup-jellyfin: ## Sauvegarder Jellyfin
+	@echo "$(YELLOW)💾 Sauvegarde de Jellyfin...$(NC)"
 	@mkdir -p $(BACKUP_DIR)
-	@docker run --rm -v plex_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/plex_$(TIMESTAMP).tar.gz /data
-	@echo "$(GREEN)✅ Plex sauvegardé : $(BACKUP_DIR)/plex_$(TIMESTAMP).tar.gz$(NC)"
+	@docker run --rm -v jellyfin_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/jellyfin_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ Jellyfin sauvegardé : $(BACKUP_DIR)/jellyfin_$(TIMESTAMP).tar.gz$(NC)"
 
 backup-qbit: ## Sauvegarder qBittorrent
 	@echo "$(YELLOW)💾 Sauvegarde de qBittorrent...$(NC)"
@@ -298,23 +286,17 @@ backup-qbit: ## Sauvegarder qBittorrent
 	@docker run --rm -v qbittorrent_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/qbittorrent_$(TIMESTAMP).tar.gz /data
 	@echo "$(GREEN)✅ qBittorrent sauvegardé : $(BACKUP_DIR)/qbittorrent_$(TIMESTAMP).tar.gz$(NC)"
 
-backup-seerr: ## Sauvegarder Seerr
-	@echo "$(YELLOW)💾 Sauvegarde de Seerr...$(NC)"
+backup-jellyseerr: ## Sauvegarder Jellyseerr
+	@echo "$(YELLOW)💾 Sauvegarde de Jellyseerr...$(NC)"
 	@mkdir -p $(BACKUP_DIR)
-	@docker run --rm -v seerr_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/seerr_$(TIMESTAMP).tar.gz /data
-	@echo "$(GREEN)✅ Seerr sauvegardé : $(BACKUP_DIR)/seerr_$(TIMESTAMP).tar.gz$(NC)"
+	@docker run --rm -v jellyseerr_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/jellyseerr_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ Jellyseerr sauvegardé : $(BACKUP_DIR)/jellyseerr_$(TIMESTAMP).tar.gz$(NC)"
 
-backup-tautulli: ## Sauvegarder Tautulli
-	@echo "$(YELLOW)💾 Sauvegarde de Tautulli...$(NC)"
+backup-jellystat: ## Sauvegarder Jellystat
+	@echo "$(YELLOW)💾 Sauvegarde de Jellystat...$(NC)"
 	@mkdir -p $(BACKUP_DIR)
-	@docker run --rm -v tautulli_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/tautulli_$(TIMESTAMP).tar.gz /data
-	@echo "$(GREEN)✅ Tautulli sauvegardé : $(BACKUP_DIR)/tautulli_$(TIMESTAMP).tar.gz$(NC)"
-
-backup-plextraktsync: ## Sauvegarder PlexTraktSync
-	@echo "$(YELLOW)💾 Sauvegarde de PlexTraktSync...$(NC)"
-	@mkdir -p $(BACKUP_DIR)
-	@tar czf $(BACKUP_DIR)/plextraktsync_$(TIMESTAMP).tar.gz plextraktsync/
-	@echo "$(GREEN)✅ PlexTraktSync sauvegardé : $(BACKUP_DIR)/plextraktsync_$(TIMESTAMP).tar.gz$(NC)"
+	@docker run --rm -v jellystat_db:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/jellystat_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ Jellystat sauvegardé : $(BACKUP_DIR)/jellystat_$(TIMESTAMP).tar.gz$(NC)"
 
 backup-recyclarr: ## Sauvegarder Recyclarr
 	@echo "$(YELLOW)💾 Sauvegarde de Recyclarr...$(NC)"
@@ -415,7 +397,7 @@ check: ## Vérification complète du système
 	@$(COMPOSE) ps
 	@echo ""
 	@echo "$(YELLOW)2. Santé des conteneurs :$(NC)"
-	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|plex|seerr)" || true
+	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|jellyfin|jellyseerr|jellystat)" || true
 	@echo ""
 	@echo "$(YELLOW)3. Usage disque :$(NC)"
 	@df -h /Users/dev/data 2>/dev/null || echo "$(RED)Dossier /Users/dev/data non trouvé$(NC)"
@@ -424,17 +406,17 @@ check: ## Vérification complète du système
 	@make vpn-check
 	@echo ""
 	@echo "$(YELLOW)5. Volumes Docker :$(NC)"
-	@docker volume ls | grep -E "(radarr|sonarr|prowlarr|plex|qbit|seerr|gluetun)"
+	@docker volume ls | grep -E "(radarr|sonarr|prowlarr|jellyfin|qbit|jellyseerr|jellystat|gluetun)"
 	@echo ""
 	@echo "$(GREEN)✅ Vérification terminée$(NC)"
 
 health: ## État de santé des services
 	@echo "$(BLUE)🏥 État de santé des services :$(NC)"
-	@docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|plex|seerr|flare)"
+	@docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|jellyfin|jellyseerr|jellystat|flare)"
 
 disk-usage: ## Usage disque des volumes
 	@echo "$(BLUE)💾 Usage disque des volumes Docker :$(NC)"
-	@docker system df -v | grep -E "(radarr|sonarr|prowlarr|plex|qbit|seerr|gluetun)" || true
+	@docker system df -v | grep -E "(radarr|sonarr|prowlarr|jellyfin|qbit|jellyseerr|jellystat|gluetun)" || true
 	@echo ""
 	@echo "$(BLUE)💾 Usage disque /Users/dev/data :$(NC)"
 	@du -sh /Users/dev/data/* 2>/dev/null || echo "$(RED)Dossier non trouvé$(NC)"
@@ -447,10 +429,10 @@ qbit-password: ## Afficher le mot de passe qBittorrent
 # MEDIA
 # ============================================================================
 
-media-scan: ## Forcer scan Plex
-	@echo "$(YELLOW)📡 Démarrage du scan Plex...$(NC)"
-	@docker exec plex sh -c "curl -X GET 'http://localhost:32400/library/sections/all/refresh?X-Plex-Token=token'" 2>/dev/null || echo "$(YELLOW)Scan lancé (si Plex est configuré)$(NC)"
-	@echo "$(GREEN)✅ Scan Plex lancé$(NC)"
+media-scan: ## Forcer scan Jellyfin
+	@echo "$(YELLOW)📡 Démarrage du scan Jellyfin...$(NC)"
+	@curl -sf -X POST "http://localhost:8096/Library/Refresh" -H "X-Emby-Authorization: MediaBrowser Token=\"$$(grep JELLYFIN_API_KEY .env 2>/dev/null | cut -d= -f2)\"" 2>/dev/null || echo "$(YELLOW)Scan lancé (si Jellyfin est configuré)$(NC)"
+	@echo "$(GREEN)✅ Scan Jellyfin lancé$(NC)"
 
 media-stats: ## Statistiques média
 	@echo "$(BLUE)📊 Statistiques des médias :$(NC)"
@@ -495,9 +477,9 @@ restart-prowlarr: ## Redémarrer Prowlarr
 	@$(COMPOSE) restart prowlarr
 	@echo "$(GREEN)✅ Prowlarr redémarré$(NC)"
 
-restart-plex: ## Redémarrer Plex
-	@$(COMPOSE) restart plex
-	@echo "$(GREEN)✅ Plex redémarré$(NC)"
+restart-jellyfin: ## Redémarrer Jellyfin
+	@$(COMPOSE) restart jellyfin
+	@echo "$(GREEN)✅ Jellyfin redémarré$(NC)"
 
 restart-qbit: ## Redémarrer qBittorrent
 	@$(COMPOSE) restart gluetun
@@ -514,9 +496,10 @@ urls: ## Afficher les URLs d'accès
 	@echo "$(YELLOW)Prowlarr      :$(NC) http://localhost:9696"
 	@echo "$(YELLOW)Radarr        :$(NC) http://localhost:7878"
 	@echo "$(YELLOW)Sonarr        :$(NC) http://localhost:8989"
-	@echo "$(YELLOW)Seerr         :$(NC) http://localhost:5055"
+	@echo "$(YELLOW)Jellyfin      :$(NC) http://localhost:8096"
+	@echo "$(YELLOW)Jellyseerr    :$(NC) http://localhost:5055"
+	@echo "$(YELLOW)Jellystat     :$(NC) http://localhost:3000"
 	@echo "$(YELLOW)qBittorrent   :$(NC) http://localhost:8090"
-	@echo "$(YELLOW)Plex          :$(NC) http://localhost:32400/web"
 	@echo "$(YELLOW)Flaresolverr  :$(NC) http://localhost:8191"
 	@echo ""
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
@@ -659,7 +642,6 @@ package: ## Créer archive complète
 		config-exports/ \
 		config-templates/ \
 		recyclarr/recyclarr.yml recyclarr/settings.yml \
-		plextraktsync/ \
 		scripts/ \
 		prowlarr/ radarr/ sonarr/ \
 		Makefile \

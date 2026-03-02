@@ -130,15 +130,6 @@ echo -e "${GREEN}✅ Services prêts${NC}\n"
 #==============================================================================
 echo -e "${YELLOW}🔐 [5/7] Configuration authentification *arr...${NC}"
 
-ARR_ADMIN_USER="${ARR_ADMIN_USER:-${JELLYFIN_ADMIN_USER:-admin}}"
-ARR_ADMIN_PASSWORD="${ARR_ADMIN_PASSWORD:-${JELLYFIN_ADMIN_PASSWORD:-}}"
-
-if [ -z "$ARR_ADMIN_PASSWORD" ]; then
-    echo -e "${YELLOW}🔑 Mot de passe admin *arr :${NC}"
-    read -s -p "  Password: " ARR_ADMIN_PASSWORD
-    echo ""
-fi
-
 configure_arr_auth() {
     local NAME=$1 HOST=$2 KEY=$3 API_VER=$4
 
@@ -150,9 +141,9 @@ configure_arr_auth() {
     echo "$CONF" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
-c['username'] = '$ARR_ADMIN_USER'
-c['password'] = '$ARR_ADMIN_PASSWORD'
-c['passwordConfirmation'] = '$ARR_ADMIN_PASSWORD'
+c['username'] = '$ADMIN_USER'
+c['password'] = '$ADMIN_PASSWORD'
+c['passwordConfirmation'] = '$ADMIN_PASSWORD'
 c['authenticationMethod'] = 'forms'
 c['authenticationRequired'] = 'disabledForLocalAddresses'
 json.dump(c, sys.stdout)
@@ -161,7 +152,7 @@ json.dump(c, sys.stdout)
         -H "Content-Type: application/json" \
         -d @- 2>/dev/null
 
-    echo -e "  ${GREEN}✓ $NAME — user: $ARR_ADMIN_USER (forms + local bypass)${NC}"
+    echo -e "  ${GREEN}✓ $NAME — user: $ADMIN_USER (forms + local bypass)${NC}"
 }
 
 configure_arr_auth "Radarr"   "http://localhost:7878" "$RADARR_API_KEY"   "v3"
@@ -175,18 +166,18 @@ echo -e "${GREEN}✅ Auth *arr configurée${NC}\n"
 #==============================================================================
 echo -e "${YELLOW}🎬 [6/7] Configuration Jellyfin...${NC}"
 
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 JELLYFIN_HOST="${JELLYFIN_HOST:-http://localhost:8096}"
-JELLYFIN_ADMIN_USER="${JELLYFIN_ADMIN_USER:-admin}"
-JELLYFIN_ADMIN_PASSWORD="${JELLYFIN_ADMIN_PASSWORD:-$ARR_ADMIN_PASSWORD}"
 JELLYFIN_SERVER_NAME="${JELLYFIN_SERVER_NAME:-Media Server}"
 JELLYFIN_LANG="${JELLYFIN_LANG:-fr}"
 JELLYFIN_COUNTRY="${JELLYFIN_COUNTRY:-FR}"
 MOVIES_PATH="/data/media/movies"
 TV_PATH="/data/media/tv"
 
-if [ -z "$JELLYFIN_ADMIN_PASSWORD" ]; then
-    echo -e "${YELLOW}🔑 Mot de passe admin Jellyfin :${NC}"
-    read -s -p "  Password: " JELLYFIN_ADMIN_PASSWORD
+if [ -z "$ADMIN_PASSWORD" ]; then
+    echo -e "${YELLOW}🔑 Mot de passe admin :${NC}"
+    read -s -p "  Password: " ADMIN_PASSWORD
     echo ""
 fi
 
@@ -216,7 +207,7 @@ if [ -n "$STARTUP_CHECK" ]; then
 
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${JELLYFIN_HOST}/Startup/User" \
         -H "Content-Type: application/json" \
-        -d "{\"Name\":\"${JELLYFIN_ADMIN_USER}\",\"Password\":\"${JELLYFIN_ADMIN_PASSWORD}\"}")
+        -d "{\"Name\":\"${ADMIN_USER}\",\"Password\":\"${ADMIN_PASSWORD}\"}")
 
     WIZARD_FIRST=false
     [ "$HTTP_CODE" != "204" ] && [ "$HTTP_CODE" != "200" ] && WIZARD_FIRST=true
@@ -230,8 +221,8 @@ if [ -n "$STARTUP_CHECK" ]; then
     echo -e "  ${GREEN}✓ Wizard complété${NC}"
 
     # ── Authentification ─────────────────────────────────────────────
-    AUTH_USER="${JELLYFIN_ADMIN_USER}"
-    AUTH_PW="${JELLYFIN_ADMIN_PASSWORD}"
+    AUTH_USER="${ADMIN_USER}"
+    AUTH_PW="${ADMIN_PASSWORD}"
     [ "${WIZARD_FIRST}" = "true" ] && AUTH_USER="root" && AUTH_PW=""
 
     AUTH_RESPONSE=$(curl -sf -X POST "${JELLYFIN_HOST}/Users/AuthenticateByName" \
@@ -246,7 +237,7 @@ if [ -n "$STARTUP_CHECK" ]; then
     # Fallback : renommer user + définir mot de passe
     if [ "${WIZARD_FIRST}" = "true" ] && [ -n "$JF_USER_ID" ] && [ -n "$JF_TOKEN" ]; then
         USER_PROFILE=$(curl -sf "${JELLYFIN_HOST}/Users/${JF_USER_ID}" -H "X-Emby-Authorization: ${JF_AUTH}")
-        echo "$USER_PROFILE" | sed "s/\"Name\":\"[^\"]*\"/\"Name\":\"${JELLYFIN_ADMIN_USER}\"/" | \
+        echo "$USER_PROFILE" | sed "s/\"Name\":\"[^\"]*\"/\"Name\":\"${ADMIN_USER}\"/" | \
         curl -sf -X POST "${JELLYFIN_HOST}/Users/${JF_USER_ID}" \
             -H "Content-Type: application/json" \
             -H "X-Emby-Authorization: ${JF_AUTH}" -d @- > /dev/null 2>&1
@@ -254,20 +245,20 @@ if [ -n "$STARTUP_CHECK" ]; then
         curl -sf -X POST "${JELLYFIN_HOST}/Users/${JF_USER_ID}/Password" \
             -H "Content-Type: application/json" \
             -H "X-Emby-Authorization: ${JF_AUTH}" \
-            -d "{\"CurrentPw\":\"\",\"NewPw\":\"${JELLYFIN_ADMIN_PASSWORD}\"}" > /dev/null 2>&1
+            -d "{\"CurrentPw\":\"\",\"NewPw\":\"${ADMIN_PASSWORD}\"}" > /dev/null 2>&1
 
         # Re-auth
         AUTH_RESPONSE=$(curl -sf -X POST "${JELLYFIN_HOST}/Users/AuthenticateByName" \
             -H "Content-Type: application/json" \
             -H "X-Emby-Authorization: MediaBrowser Client=\"Setup\", Device=\"CLI\", DeviceId=\"setup\", Version=\"1.0\"" \
-            -d "{\"Username\":\"${JELLYFIN_ADMIN_USER}\",\"Pw\":\"${JELLYFIN_ADMIN_PASSWORD}\"}" 2>/dev/null || echo "")
+            -d "{\"Username\":\"${ADMIN_USER}\",\"Pw\":\"${ADMIN_PASSWORD}\"}" 2>/dev/null || echo "")
         JF_TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"AccessToken":"[^"]*"' | cut -d'"' -f4)
         JF_AUTH="MediaBrowser Token=\"${JF_TOKEN}\""
-        echo -e "  ${GREEN}✓ Utilisateur '${JELLYFIN_ADMIN_USER}' configuré (fallback)${NC}"
+        echo -e "  ${GREEN}✓ Utilisateur '${ADMIN_USER}' configuré (fallback)${NC}"
     fi
 
     if [ -n "$JF_TOKEN" ]; then
-        echo -e "  ${GREEN}✓ Authentifié en tant que '${JELLYFIN_ADMIN_USER}'${NC}"
+        echo -e "  ${GREEN}✓ Authentifié en tant que '${ADMIN_USER}'${NC}"
 
         # ── Bibliothèques ────────────────────────────────────────────
         echo -e "  ${YELLOW}→ Ajout bibliothèques...${NC}"
@@ -321,7 +312,7 @@ echo -e "\n${BLUE}╔═══════════════════�
 echo -e "${BLUE}║           ✅ Installation terminée !                 ║${NC}"
 echo -e "${BLUE}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${BLUE}║${NC} VPN IP       : ${GREEN}${VPN_IP}${NC}"
-echo -e "${BLUE}║${NC} Admin        : ${GREEN}${JELLYFIN_ADMIN_USER}${NC}"
+echo -e "${BLUE}║${NC} Admin        : ${GREEN}${ADMIN_USER}${NC}"
 echo -e "${BLUE}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${BLUE}║${NC} Jellyfin     : ${GREEN}http://localhost:8096${NC}"
 echo -e "${BLUE}║${NC} Jellyseerr   : ${GREEN}http://localhost:5055${NC}"

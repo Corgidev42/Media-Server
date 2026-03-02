@@ -29,14 +29,14 @@ CONTAINERS=(
     "prowlarr"
     "radarr" 
     "sonarr"
-    "seerr"
+    "jellyseerr"
     "overseerr"
     "qbittorrent"
     "flaresolverr"
     "gluetun"
     "jellyfin"
-    "plex"
-    "tautulli"
+    "jellystat"
+    "jellystat-db"
 )
 
 for container in "${CONTAINERS[@]}"; do
@@ -59,8 +59,9 @@ VOLUMES=(
     "prowlarr_config"
     "radarr_config"
     "sonarr_config"
-    "seerr_config"
-    "overseerr_config"
+    "jellyseerr_config"
+    "jellyfin_config"
+    "jellystat_db"
     "qbittorrent_config"
     "flaresolverr_config"
     "gluetun_config"
@@ -88,10 +89,8 @@ CONFIG_DIRS=(
     "$HOME/Library/Application Support/prowlarr"
     "$HOME/Library/Application Support/radarr"
     "$HOME/Library/Application Support/sonarr"
-    "$HOME/Library/Application Support/overseerr"
-    "$HOME/Library/Application Support/seerr"
+    "$HOME/Library/Application Support/jellyseerr"
     "$HOME/Library/Application Support/qbittorrent"
-    "$HOME/Library/Application Support/Plex Media Server"
     "$HOME/Library/Application Support/jellyfin"
 )
 

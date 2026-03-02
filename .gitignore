@@ -28,6 +28,9 @@ backups/
 data/
 downloads/
 media/
+prowlarr/
+sonarr/
+radarr/
 
 # ======================
 # Recyclarr (garder seulement recyclarr.yml + settings.yml)
