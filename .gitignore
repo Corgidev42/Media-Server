@@ -48,3 +48,4 @@ recyclarr/.cache/
 .backup-exports/
 config-exports-clean/
 test-backup/
+.commit-msg.txt
