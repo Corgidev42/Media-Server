@@ -1,8 +1,13 @@
 #!/bin/bash
 #==============================================================================
-# Import configuration via API
-# Lit les fichiers JSON nettoyés depuis ./config-exports/
+# Import configuration via API (idempotent)
+# Lit les fichiers JSON depuis ./config-exports/
 # et les pousse vers les APIs Prowlarr, Radarr, Sonarr, qBittorrent
+#
+# Features:
+#   - Deduplication par nom (skip si existe deja)
+#   - Remapping des IDs custom formats dans les quality profiles
+#   - Update via PUT des quality profiles existants
 #==============================================================================
 
 # Couleurs
@@ -10,6 +15,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Charger .env depuis la racine du projet
@@ -20,13 +26,14 @@ cd "$SCRIPT_DIR/.."
 CONFIG_DIR="./config-exports"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║                Import Configuration                    ║${NC}"
+echo -e "${BLUE}║           Import Configuration (idempotent)            ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}\n"
 
 [ ! -d "$CONFIG_DIR" ] && { echo -e "${RED}$CONFIG_DIR manquant — lancez d'abord: make export${NC}"; exit 1; }
 
 # Compteurs
 TOTAL_OK=0
+TOTAL_SKIP=0
 TOTAL_FAIL=0
 
 #------------------------------------------------------------------------------
@@ -54,7 +61,17 @@ wait_for_service() {
     return 1
 }
 
-# Import un tableau d'objets via POST
+# Recupere les noms existants sur un endpoint (pour deduplication)
+# Usage: get_existing_names <endpoint> <api_key> [name_field]
+get_existing_names() {
+    local endpoint="$1"
+    local api_key="$2"
+    local name_field="${3:-.name}"
+    curl -s -H "X-Api-Key: $api_key" "$endpoint" 2>/dev/null \
+        | jq -r ".[] | $name_field // empty" 2>/dev/null
+}
+
+# Import un tableau d'objets via POST avec deduplication par nom
 import_array() {
     local file="$1"
     local endpoint="$2"
@@ -66,10 +83,21 @@ import_array() {
     local count=$(jq 'length' "$file")
     [ "$count" = "0" ] && { echo -e "  ${YELLOW}  skip${NC} $label (vide)"; return; }
 
+    # Recuperer les noms existants pour deduplication
+    local existing_names
+    existing_names=$(get_existing_names "$endpoint" "$api_key" "$name_field")
+
     echo -e "${YELLOW}  > $label ($count elements)...${NC}"
     for i in $(seq 0 $((count - 1))); do
         local item=$(jq ".[$i]" "$file")
         local name=$(echo "$item" | jq -r "$name_field // \"item-$i\"")
+
+        # Deduplication: skip si existe deja
+        if echo "$existing_names" | grep -qxF "$name"; then
+            echo -e "    ${CYAN}skip${NC} $name (existe deja)"
+            TOTAL_SKIP=$((TOTAL_SKIP + 1))
+            continue
+        fi
 
         response=$(curl -s -w "\n%{http_code}" \
             -X POST \
@@ -83,6 +111,85 @@ import_array() {
 
         if [ "$http_code" = "201" ] || [ "$http_code" = "200" ]; then
             echo -e "    ${GREEN}ok${NC} $name"
+            TOTAL_OK=$((TOTAL_OK + 1))
+        else
+            error_msg=$(echo "$body" | jq -r '.[0].errorMessage // .message // "unknown"' 2>/dev/null)
+            echo -e "    ${RED}FAIL${NC} $name (HTTP $http_code: $error_msg)"
+            TOTAL_FAIL=$((TOTAL_FAIL + 1))
+        fi
+    done
+}
+
+# Import les quality profiles avec remapping des IDs custom formats
+# Les QPs exportes referencent les CFs par d'anciens IDs.
+# On utilise formatItems[].name pour retrouver le nouvel ID.
+import_quality_profiles() {
+    local file="$1"
+    local cf_endpoint="$2"
+    local qp_endpoint="$3"
+    local api_key="$4"
+    local label="$5"
+
+    [ ! -f "$file" ] && return
+    local count=$(jq 'length' "$file")
+    [ "$count" = "0" ] && { echo -e "  ${YELLOW}  skip${NC} $label (vide)"; return; }
+
+    echo -e "${YELLOW}  > $label ($count elements)...${NC}"
+
+    # 1) Construire le mapping name → new_id depuis les CFs actuels
+    local cf_map
+    cf_map=$(curl -s -H "X-Api-Key: $api_key" "$cf_endpoint" 2>/dev/null \
+        | jq 'map({key: .name, value: .id}) | from_entries')
+
+    # 2) Recuperer les QPs existants (name → id)
+    local existing_qps
+    existing_qps=$(curl -s -H "X-Api-Key: $api_key" "$qp_endpoint" 2>/dev/null)
+    local qp_name_to_id
+    qp_name_to_id=$(echo "$existing_qps" | jq 'map({key: .name, value: .id}) | from_entries')
+
+    for i in $(seq 0 $((count - 1))); do
+        local item=$(jq ".[$i]" "$file")
+        local name=$(echo "$item" | jq -r '.name // "profile"')
+
+        # Remapper formatItems[].format en utilisant le nom pour trouver le nouvel ID
+        local remapped
+        remapped=$(echo "$item" | jq --argjson cfmap "$cf_map" '
+            .formatItems = [.formatItems[] |
+                .format = ($cfmap[.name] // .format)
+            ]
+        ')
+
+        # Verifier si ce QP existe deja
+        local existing_id
+        existing_id=$(echo "$qp_name_to_id" | jq -r --arg n "$name" '.[$n] // empty')
+
+        if [ -n "$existing_id" ]; then
+            # PUT update
+            remapped=$(echo "$remapped" | jq ".id = $existing_id")
+            response=$(curl -s -w "\n%{http_code}" \
+                -X PUT \
+                -H "X-Api-Key: $api_key" \
+                -H "Content-Type: application/json" \
+                -d "$remapped" \
+                "$qp_endpoint/$existing_id")
+        else
+            # POST create (strip id)
+            remapped=$(echo "$remapped" | jq 'del(.id)')
+            response=$(curl -s -w "\n%{http_code}" \
+                -X POST \
+                -H "X-Api-Key: $api_key" \
+                -H "Content-Type: application/json" \
+                -d "$remapped" \
+                "$qp_endpoint")
+        fi
+
+        http_code=$(echo "$response" | tail -1)
+        body=$(echo "$response" | sed '$d')
+
+        if [ "$http_code" = "201" ] || [ "$http_code" = "200" ] || [ "$http_code" = "202" ]; then
+            local action="created"
+            [ -n "$existing_id" ] && action="updated"
+            echo -e "    ${GREEN}ok${NC} $name ($action)"
             TOTAL_OK=$((TOTAL_OK + 1))
         else
             error_msg=$(echo "$body" | jq -r '.[0].errorMessage // .message // "unknown"' 2>/dev/null)
@@ -167,7 +274,8 @@ else
         import_array "$CONFIG_DIR/radarr-customformats.json" \
             "http://localhost:7878/api/v3/customformat" "$RADARR_API_KEY" "Custom formats"
 
-        import_array "$CONFIG_DIR/radarr-qualityprofiles.json" \
+        import_quality_profiles "$CONFIG_DIR/radarr-qualityprofiles.json" \
+            "http://localhost:7878/api/v3/customformat" \
             "http://localhost:7878/api/v3/qualityprofile" "$RADARR_API_KEY" "Quality profiles"
 
         import_array "$CONFIG_DIR/radarr-downloadclients.json" \
@@ -199,7 +307,8 @@ else
         import_array "$CONFIG_DIR/sonarr-customformats.json" \
             "http://localhost:8989/api/v3/customformat" "$SONARR_API_KEY" "Custom formats"
 
-        import_array "$CONFIG_DIR/sonarr-qualityprofiles.json" \
+        import_quality_profiles "$CONFIG_DIR/sonarr-qualityprofiles.json" \
+            "http://localhost:8989/api/v3/customformat" \
             "http://localhost:8989/api/v3/qualityprofile" "$SONARR_API_KEY" "Quality profiles"
 
         import_array "$CONFIG_DIR/sonarr-downloadclients.json" \
@@ -268,14 +377,16 @@ fi
 # Resume
 #==============================================================================
 echo -e "\n${BLUE}════════════════════════════════════════════════════════${NC}"
-echo -e "  ${GREEN}Succes : $TOTAL_OK${NC}  |  ${RED}Echecs : $TOTAL_FAIL${NC}"
+echo -e "  ${GREEN}Succes : $TOTAL_OK${NC}  |  ${CYAN}Skip : $TOTAL_SKIP${NC}  |  ${RED}Echecs : $TOTAL_FAIL${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}\n"
 
 if [ $TOTAL_FAIL -gt 0 ]; then
     echo -e "${YELLOW}Certains imports ont echoue. Causes possibles :${NC}"
-    echo -e "  - Quality profiles referençant des custom formats manquants"
-    echo -e "  - Indexers avec credentials expires"
-    echo -e "  - Custom formats geres par Recyclarr (doublons normaux)"
+    echo -e "  - Indexers avec credentials expires (re-configurer manuellement)"
+    echo -e "  - Probleme reseau ou service pas pret"
     echo -e ""
-    echo -e "${YELLOW}Conseil : lancez 'make restore' pour completer avec Recyclarr${NC}"
+fi
+
+if [ $TOTAL_SKIP -gt 0 ]; then
+    echo -e "${CYAN}Les elements marques 'skip' existaient deja (import idempotent).${NC}\n"
 fi
