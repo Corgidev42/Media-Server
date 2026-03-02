@@ -123,6 +123,7 @@ wait_for_service "Radarr"   "http://localhost:7878/api/v3/system/status?apikey=$
 wait_for_service "Sonarr"   "http://localhost:8989/api/v3/system/status?apikey=${SONARR_API_KEY}" 90
 wait_for_service "Prowlarr" "http://localhost:9696/api/v1/system/status?apikey=${PROWLARR_API_KEY}" 90
 wait_for_service "Jellyfin" "http://localhost:8096/health" 90
+# Jackett vérifié plus tard via docker exec (API protégée par cookie)
 echo -e "${GREEN}✅ Services prêts${NC}\n"
 
 #==============================================================================
@@ -160,6 +161,136 @@ configure_arr_auth "Sonarr"   "http://localhost:8989" "$SONARR_API_KEY"   "v3"
 configure_arr_auth "Prowlarr" "http://localhost:9696" "$PROWLARR_API_KEY" "v1"
 
 echo -e "${GREEN}✅ Auth *arr configurée${NC}\n"
+
+#==============================================================================
+# ÉTAPE 5b : Configuration FlareSolverr + indexeurs Prowlarr
+#==============================================================================
+echo -e "${YELLOW}🔥 [5b/7] Configuration FlareSolverr + indexeurs...${NC}"
+
+PROWLARR_HOST="http://localhost:9696"
+
+# Créer le tag flaresolverr (idempotent)
+EXISTING_TAGS=$(curl -sf -H "X-Api-Key: $PROWLARR_API_KEY" "$PROWLARR_HOST/api/v1/tag" 2>/dev/null || echo "[]")
+FS_TAG_ID=$(echo "$EXISTING_TAGS" | jq -r '.[] | select(.label == "flaresolverr") | .id')
+
+if [ -z "$FS_TAG_ID" ]; then
+    FS_TAG_ID=$(curl -sf -X POST -H "X-Api-Key: $PROWLARR_API_KEY" -H "Content-Type: application/json" \
+        -d '{"label":"flaresolverr"}' "$PROWLARR_HOST/api/v1/tag" | jq '.id')
+    echo -e "  ${GREEN}✓ Tag 'flaresolverr' créé (ID: $FS_TAG_ID)${NC}"
+else
+    echo -e "  ${GREEN}✓ Tag 'flaresolverr' existe (ID: $FS_TAG_ID)${NC}"
+fi
+
+# Créer le proxy FlareSolverr (idempotent)
+EXISTING_PROXIES=$(curl -sf -H "X-Api-Key: $PROWLARR_API_KEY" "$PROWLARR_HOST/api/v1/indexerProxy" 2>/dev/null || echo "[]")
+FS_PROXY_EXISTS=$(echo "$EXISTING_PROXIES" | jq '[.[] | select(.implementation == "FlareSolverr")] | length')
+
+if [ "$FS_PROXY_EXISTS" = "0" ]; then
+    curl -sf -X POST -H "X-Api-Key: $PROWLARR_API_KEY" -H "Content-Type: application/json" \
+        -d "{
+            \"name\": \"FlareSolverr\",
+            \"implementation\": \"FlareSolverr\",
+            \"configContract\": \"FlareSolverrSettings\",
+            \"fields\": [
+                {\"name\": \"host\", \"value\": \"http://flaresolverr:8191/\"},
+                {\"name\": \"requestTimeout\", \"value\": 60}
+            ],
+            \"tags\": [$FS_TAG_ID]
+        }" "$PROWLARR_HOST/api/v1/indexerProxy" > /dev/null 2>&1
+    echo -e "  ${GREEN}✓ Proxy FlareSolverr configuré (→ flaresolverr:8191)${NC}"
+else
+    echo -e "  ${GREEN}✓ Proxy FlareSolverr déjà configuré${NC}"
+fi
+
+# Ajouter 1337x avec tag FlareSolverr (idempotent)
+EXISTING_INDEXERS=$(curl -sf -H "X-Api-Key: $PROWLARR_API_KEY" "$PROWLARR_HOST/api/v1/indexer" 2>/dev/null || echo "[]")
+INDEXER_1337X=$(echo "$EXISTING_INDEXERS" | jq '[.[] | select(.name == "1337x")] | length')
+
+if [ "$INDEXER_1337X" = "0" ]; then
+    curl -sf -X POST -H "X-Api-Key: $PROWLARR_API_KEY" -H "Content-Type: application/json" \
+        -d "{
+            \"name\": \"1337x\",
+            \"definitionName\": \"1337x\",
+            \"implementation\": \"Cardigann\",
+            \"configContract\": \"CardigannSettings\",
+            \"protocol\": \"torrent\",
+            \"priority\": 25,
+            \"enable\": true,
+            \"appProfileId\": 1,
+            \"tags\": [$FS_TAG_ID],
+            \"fields\": [
+                {\"name\": \"definitionFile\", \"value\": \"1337x\"},
+                {\"name\": \"baseUrl\", \"value\": \"https://1337x.to\"},
+                {\"name\": \"torrentBaseSettings.preferMagnetUrl\", \"value\": true},
+                {\"name\": \"downloadlink\", \"value\": 0},
+                {\"name\": \"downloadlink2\", \"value\": 1},
+                {\"name\": \"sort\", \"value\": 2},
+                {\"name\": \"type\", \"value\": 1}
+            ]
+        }" "$PROWLARR_HOST/api/v1/indexer" > /dev/null 2>&1
+    echo -e "  ${GREEN}✓ 1337x ajouté (avec FlareSolverr)${NC}"
+else
+    echo -e "  ${GREEN}✓ 1337x déjà configuré${NC}"
+fi
+
+# Ajouter YGG via Jackett (idempotent)
+JACKETT_YGG=$(echo "$EXISTING_INDEXERS" | jq '[.[] | select(.name == "YGG (Jackett)")] | length')
+
+if [ "$JACKETT_YGG" = "0" ]; then
+    # Attendre que Jackett soit prêt
+    echo -e "  ${YELLOW}→ Attente Jackett...${NC}"
+    JACKETT_READY=false
+    for i in $(seq 1 30); do
+        if docker exec jackett test -f /config/Jackett/ServerConfig.json 2>/dev/null; then
+            JACKETT_READY=true; break
+        fi
+        sleep 2
+    done
+
+    if [ "$JACKETT_READY" = true ]; then
+        # Récupérer l'API key et configurer FlareSolverr dans Jackett
+        JACKETT_API_KEY=$(docker exec jackett cat /config/Jackett/ServerConfig.json 2>/dev/null | jq -r '.APIKey // empty')
+
+        # Configurer FlareSolverr dans Jackett (une seule fois)
+        JACKETT_FS=$(docker exec jackett cat /config/Jackett/ServerConfig.json 2>/dev/null | jq -r '.FlareSolverrUrl // empty')
+        if [ -z "$JACKETT_FS" ] || [ "$JACKETT_FS" = "null" ]; then
+            docker exec jackett cat /config/Jackett/ServerConfig.json \
+                | jq '.FlareSolverrUrl = "http://flaresolverr:8191"' \
+                > /tmp/jackett-cfg.json 2>/dev/null
+            docker cp /tmp/jackett-cfg.json jackett:/config/Jackett/ServerConfig.json > /dev/null 2>&1
+            rm -f /tmp/jackett-cfg.json
+            $COMPOSE restart jackett > /dev/null 2>&1
+            sleep 5
+            echo -e "  ${GREEN}✓ FlareSolverr configuré dans Jackett${NC}"
+        fi
+
+        if [ -n "$JACKETT_API_KEY" ]; then
+            # Persister Jackett API key dans .env
+            if ! grep -q "^JACKETT_API_KEY=" .env; then
+                echo "JACKETT_API_KEY=${JACKETT_API_KEY}" >> .env
+            else
+                sed -i.bak "s|^JACKETT_API_KEY=.*|JACKETT_API_KEY=${JACKETT_API_KEY}|" .env && rm -f .env.bak
+            fi
+
+            echo -e "  ${GREEN}✓ Jackett prêt (API key: ${JACKETT_API_KEY:0:8}...)${NC}"
+            echo -e "  ${YELLOW}⚠  Configurez YGG dans Jackett : http://localhost:9117${NC}"
+            echo -e "  ${YELLOW}   Puis ajoutez le Torznab feed dans Prowlarr → Indexers → Add → Torznab${NC}"
+        else
+            echo -e "  ${YELLOW}⚠  Jackett : API key non trouvée${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠  Jackett : timeout (configurez manuellement)${NC}"
+    fi
+else
+    echo -e "  ${GREEN}✓ YGG (Jackett) déjà configuré${NC}"
+fi
+
+# Sync des indexers vers Radarr/Sonarr
+curl -sf -X POST -H "X-Api-Key: $PROWLARR_API_KEY" -H "Content-Type: application/json" \
+    -d '{"name": "AppIndexerSync"}' "$PROWLARR_HOST/api/v1/command" > /dev/null 2>&1
+echo -e "  ${GREEN}✓ Sync indexeurs → Radarr/Sonarr${NC}"
+
+echo -e "${GREEN}✅ Indexeurs configurés${NC}\n"
 
 #==============================================================================
 # ÉTAPE 6 : Configuration Jellyfin (wizard + bibliothèques)
@@ -320,11 +451,16 @@ echo -e "${BLUE}║${NC} Jellystat    : ${GREEN}http://localhost:3000${NC}"
 echo -e "${BLUE}║${NC} Radarr       : ${GREEN}http://localhost:7878${NC}"
 echo -e "${BLUE}║${NC} Sonarr       : ${GREEN}http://localhost:8989${NC}"
 echo -e "${BLUE}║${NC} Prowlarr     : ${GREEN}http://localhost:9696${NC}"
+echo -e "${BLUE}║${NC} Jackett      : ${GREEN}http://localhost:9117${NC}"
 echo -e "${BLUE}║${NC} qBittorrent  : ${GREEN}http://localhost:8090${NC}"
+echo -e "${BLUE}║${NC} RDTClient    : ${GREEN}http://localhost:6500${NC}"
 echo -e "${BLUE}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${BLUE}║${NC} ${YELLOW}Prochaines étapes :${NC}"
-echo -e "${BLUE}║${NC}  1. Plugin Trakt : Dashboard > Plugins > Catalogue"
-echo -e "${BLUE}║${NC}  2. Jellyseerr   : connecter Jellyfin + Radarr/Sonarr"
-echo -e "${BLUE}║${NC}  3. Jellystat    : connecter à Jellyfin (API key)"
-echo -e "${BLUE}║${NC}  4. Infuse 8     : ajouter serveur Jellyfin"
+echo -e "${BLUE}║${NC}  1. Jackett       : configurer YGG (http://localhost:9117)"
+echo -e "${BLUE}║${NC}  2. Prowlarr      : ajouter YGG Torznab depuis Jackett"
+echo -e "${BLUE}║${NC}  3. RDTClient     : configurer AllDebrid (http://localhost:6500)"
+echo -e "${BLUE}║${NC}  4. Plugin Trakt  : Dashboard > Plugins > Catalogue"
+echo -e "${BLUE}║${NC}  5. Jellyseerr    : connecter Jellyfin + Radarr/Sonarr"
+echo -e "${BLUE}║${NC}  6. Jellystat     : connecter à Jellyfin (API key)"
+echo -e "${BLUE}║${NC}  7. Infuse 8      : ajouter serveur Jellyfin"
 echo -e "${BLUE}╚══════════════════════════════════════════════════════╝${NC}"

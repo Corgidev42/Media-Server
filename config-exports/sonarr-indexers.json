@@ -15,7 +15,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/2/",
+        "value": "http://prowlarr:9696/7/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -49,8 +49,10 @@
         "helpText": "Drop down list, leave blank to disable standard/daily shows",
         "value": [
           5000,
+          5070,
           5040,
-          5030
+          5030,
+          5080
         ],
         "type": "select",
         "advanced": false,
@@ -98,10 +100,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -446,7 +445,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/4/",
+        "value": "http://prowlarr:9696/1/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -525,10 +524,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -873,7 +869,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/7/",
+        "value": "http://prowlarr:9696/2/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -906,7 +902,8 @@
         "label": "Categories",
         "helpText": "Drop down list, leave blank to disable standard/daily shows",
         "value": [
-          5000
+          5000,
+          5070
         ],
         "type": "select",
         "advanced": false,
@@ -954,10 +951,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -1284,9 +1278,7 @@
     "implementation": "Torznab",
     "configContract": "TorznabSettings",
     "infoLink": "https://wiki.servarr.com/sonarr/supported#torznab",
-    "tags": [
-      1
-    ]
+    "tags": []
   },
   {
     "enableRss": true,
@@ -1304,7 +1296,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/8/",
+        "value": "http://prowlarr:9696/3/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -1337,7 +1329,8 @@
         "label": "Categories",
         "helpText": "Drop down list, leave blank to disable standard/daily shows",
         "value": [
-          5000
+          5000,
+          5070
         ],
         "type": "select",
         "advanced": false,
@@ -1730,7 +1723,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/5/",
+        "value": "http://prowlarr:9696/4/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -1812,10 +1805,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -2142,9 +2132,7 @@
     "implementation": "Torznab",
     "configContract": "TorznabSettings",
     "infoLink": "https://wiki.servarr.com/sonarr/supported#torznab",
-    "tags": [
-      1
-    ]
+    "tags": []
   },
   {
     "enableRss": true,
@@ -2162,7 +2150,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/6/",
+        "value": "http://prowlarr:9696/5/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -2241,10 +2229,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -2571,9 +2556,7 @@
     "implementation": "Torznab",
     "configContract": "TorznabSettings",
     "infoLink": "https://wiki.servarr.com/sonarr/supported#torznab",
-    "tags": [
-      1
-    ]
+    "tags": []
   },
   {
     "enableRss": true,
@@ -2591,7 +2574,7 @@
         "order": 0,
         "name": "baseUrl",
         "label": "URL",
-        "value": "http://prowlarr:9696/3/",
+        "value": "http://prowlarr:9696/6/",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -2624,7 +2607,9 @@
         "label": "Categories",
         "helpText": "Drop down list, leave blank to disable standard/daily shows",
         "value": [
-          5000
+          5000,
+          5070,
+          5080
         ],
         "type": "select",
         "advanced": false,
@@ -2672,10 +2657,7 @@
         "name": "multiLanguages",
         "label": "Multi Languages",
         "helpText": "What languages are normally in a multi release on this indexer?",
-        "value": [
-          1,
-          2
-        ],
+        "value": [],
         "type": "select",
         "advanced": true,
         "selectOptions": [
@@ -3002,9 +2984,7 @@
     "implementation": "Torznab",
     "configContract": "TorznabSettings",
     "infoLink": "https://wiki.servarr.com/sonarr/supported#torznab",
-    "tags": [
-      1
-    ]
+    "tags": []
   },
   {
     "enableRss": false,

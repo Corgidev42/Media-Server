@@ -3,8 +3,8 @@
     "enable": true,
     "protocol": "torrent",
     "priority": 1,
-    "removeCompletedDownloads": true,
-    "removeFailedDownloads": true,
+    "removeCompletedDownloads": false,
+    "removeFailedDownloads": false,
     "name": "qBittorrent",
     "fields": [
       {
@@ -73,7 +73,7 @@
         "name": "movieCategory",
         "label": "Category",
         "helpText": "Adding a category specific to Radarr avoids conflicts with unrelated non-Radarr downloads. Using a category is optional, but strongly recommended.",
-        "value": "radarr-movies",
+        "value": "radarr",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",

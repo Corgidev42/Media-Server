@@ -334,8 +334,14 @@ if [ -f "$CONFIG_DIR/qbittorrent-preferences.json" ]; then
     echo -e "${YELLOW}  Attente qBittorrent...${NC}"
     qbit_ready=false
     for i in $(seq 1 30); do
-        code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8090/api/v2/app/version" 2>/dev/null)
-        [ "$code" = "200" ] && { qbit_ready=true; break; }
+        # qBit returns 403 without auth on most endpoints, so we try login
+        login_resp=$(curl -s -w "\n%{http_code}" --data "username=admin&password=${QBITTORRENT_PASSWORD:-admin}" \
+            "http://localhost:8090/api/v2/auth/login" 2>/dev/null)
+        code=$(echo "$login_resp" | tail -1)
+        body=$(echo "$login_resp" | head -1)
+        if [ "$code" = "200" ] && [ "$body" = "Ok." ]; then
+            qbit_ready=true; break
+        fi
         sleep 2
     done
 

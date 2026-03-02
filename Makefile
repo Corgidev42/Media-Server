@@ -46,6 +46,8 @@ help: ## Affiche l'aide
 	@echo "  make logs-jellyseerr    - Logs Jellyseerr"
 	@echo "  make logs-jellystat     - Logs Jellystat"
 	@echo "  make logs-recyclarr     - Logs Recyclarr"
+	@echo "  make logs-jackett       - Logs Jackett"
+	@echo "  make logs-rdtclient     - Logs RDTClient"
 	@echo ""
 	@echo "$(YELLOW)🔄 MISE À JOUR :$(NC)"
 	@echo "  make update             - Mettre à jour tous les services"
@@ -55,6 +57,8 @@ help: ## Affiche l'aide
 	@echo "  make update-jellyseerr  - Mettre à jour Jellyseerr uniquement"
 	@echo "  make update-jellystat   - Mettre à jour Jellystat uniquement"
 	@echo "  make update-recyclarr   - Mettre à jour Recyclarr uniquement"
+	@echo "  make update-jackett     - Mettre à jour Jackett uniquement"
+	@echo "  make update-rdtclient   - Mettre à jour RDTClient uniquement"
 	@echo ""
 	@echo "$(YELLOW)📂 BACKUP & RESTORE :$(NC)"
 	@echo "  make backup-all         - Sauvegarder toutes les configs"
@@ -183,6 +187,14 @@ logs-flaresolverr: ## Logs Flaresolverr
 	@echo "$(BLUE)🔥 Logs Flaresolverr (Ctrl+C pour quitter)$(NC)"
 	@docker logs -f flaresolverr --tail=100
 
+logs-jackett: ## Logs Jackett
+	@echo "$(BLUE)🔍 Logs Jackett (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f jackett --tail=100
+
+logs-rdtclient: ## Logs RDTClient
+	@echo "$(BLUE)💎 Logs RDTClient (Ctrl+C pour quitter)$(NC)"
+	@docker logs -f rdtclient --tail=100
+
 # ============================================================================
 # MISE À JOUR DES SERVICES
 # ============================================================================
@@ -248,11 +260,23 @@ update-gluetun: ## Mettre à jour Gluetun
 	@$(COMPOSE) up -d gluetun
 	@echo "$(GREEN)✅ Gluetun mis à jour$(NC)"
 
+update-jackett: ## Mettre à jour Jackett
+	@echo "$(YELLOW)📦 Mise à jour de Jackett...$(NC)"
+	@$(COMPOSE) pull jackett
+	@$(COMPOSE) up -d jackett
+	@echo "$(GREEN)✅ Jackett mis à jour$(NC)"
+
+update-rdtclient: ## Mettre à jour RDTClient
+	@echo "$(YELLOW)📦 Mise à jour de RDTClient...$(NC)"
+	@$(COMPOSE) pull rdtclient
+	@$(COMPOSE) up -d rdtclient
+	@echo "$(GREEN)✅ RDTClient mis à jour$(NC)"
+
 # ============================================================================
 # BACKUP & RESTORE
 # ============================================================================
 
-backup-all: backup-radarr backup-sonarr backup-prowlarr backup-jellyfin backup-qbit backup-jellyseerr backup-jellystat backup-recyclarr ## Sauvegarder tout
+backup-all: backup-radarr backup-sonarr backup-prowlarr backup-jellyfin backup-qbit backup-jellyseerr backup-jellystat backup-recyclarr backup-jackett backup-rdtclient ## Sauvegarder tout
 	@echo "$(GREEN)✅ Sauvegarde complète terminée dans $(BACKUP_DIR)/$(NC)"
 	@ls -lh $(BACKUP_DIR)
 
@@ -303,6 +327,18 @@ backup-recyclarr: ## Sauvegarder Recyclarr
 	@mkdir -p $(BACKUP_DIR)
 	@tar czf $(BACKUP_DIR)/recyclarr_$(TIMESTAMP).tar.gz recyclarr/
 	@echo "$(GREEN)✅ Recyclarr sauvegardé : $(BACKUP_DIR)/recyclarr_$(TIMESTAMP).tar.gz$(NC)"
+
+backup-jackett: ## Sauvegarder Jackett
+	@echo "$(YELLOW)💾 Sauvegarde de Jackett...$(NC)"
+	@mkdir -p $(BACKUP_DIR)
+	@docker run --rm -v jackett_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/jackett_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ Jackett sauvegardé : $(BACKUP_DIR)/jackett_$(TIMESTAMP).tar.gz$(NC)"
+
+backup-rdtclient: ## Sauvegarder RDTClient
+	@echo "$(YELLOW)💾 Sauvegarde de RDTClient...$(NC)"
+	@mkdir -p $(BACKUP_DIR)
+	@docker run --rm -v rdtclient_config:/data -v $(PWD)/$(BACKUP_DIR):/backup alpine tar czf /backup/rdtclient_$(TIMESTAMP).tar.gz /data
+	@echo "$(GREEN)✅ RDTClient sauvegardé : $(BACKUP_DIR)/rdtclient_$(TIMESTAMP).tar.gz$(NC)"
 
 restore-radarr: ## Restaurer Radarr (make restore-radarr FILE=radarr_20240224.tar.gz)
 	@echo "$(YELLOW)📥 Restauration de Radarr depuis $(FILE)...$(NC)"
@@ -397,7 +433,7 @@ check: ## Vérification complète du système
 	@$(COMPOSE) ps
 	@echo ""
 	@echo "$(YELLOW)2. Santé des conteneurs :$(NC)"
-	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|jellyfin|jellyseerr|jellystat)" || true
+	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|jackett|qbit|jellyfin|jellyseerr|jellystat|rdtclient)" || true
 	@echo ""
 	@echo "$(YELLOW)3. Usage disque :$(NC)"
 	@df -h /Users/dev/data 2>/dev/null || echo "$(RED)Dossier /Users/dev/data non trouvé$(NC)"
@@ -406,17 +442,17 @@ check: ## Vérification complète du système
 	@make vpn-check
 	@echo ""
 	@echo "$(YELLOW)5. Volumes Docker :$(NC)"
-	@docker volume ls | grep -E "(radarr|sonarr|prowlarr|jellyfin|qbit|jellyseerr|jellystat|gluetun)"
+	@docker volume ls | grep -E "(radarr|sonarr|prowlarr|jackett|jellyfin|qbit|jellyseerr|jellystat|gluetun|rdtclient)"
 	@echo ""
 	@echo "$(GREEN)✅ Vérification terminée$(NC)"
 
 health: ## État de santé des services
 	@echo "$(BLUE)🏥 État de santé des services :$(NC)"
-	@docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|qbit|jellyfin|jellyseerr|jellystat|flare)"
+	@docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(gluetun|radarr|sonarr|prowlarr|jackett|qbit|jellyfin|jellyseerr|jellystat|flare|rdtclient)"
 
 disk-usage: ## Usage disque des volumes
 	@echo "$(BLUE)💾 Usage disque des volumes Docker :$(NC)"
-	@docker system df -v | grep -E "(radarr|sonarr|prowlarr|jellyfin|qbit|jellyseerr|jellystat|gluetun)" || true
+	@docker system df -v | grep -E "(radarr|sonarr|prowlarr|jackett|jellyfin|qbit|jellyseerr|jellystat|gluetun|rdtclient)" || true
 	@echo ""
 	@echo "$(BLUE)💾 Usage disque /Users/dev/data :$(NC)"
 	@du -sh /Users/dev/data/* 2>/dev/null || echo "$(RED)Dossier non trouvé$(NC)"
@@ -494,12 +530,14 @@ urls: ## Afficher les URLs d'accès
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Prowlarr      :$(NC) http://localhost:9696"
+	@echo "$(YELLOW)Jackett       :$(NC) http://localhost:9117"
 	@echo "$(YELLOW)Radarr        :$(NC) http://localhost:7878"
 	@echo "$(YELLOW)Sonarr        :$(NC) http://localhost:8989"
 	@echo "$(YELLOW)Jellyfin      :$(NC) http://localhost:8096"
 	@echo "$(YELLOW)Jellyseerr    :$(NC) http://localhost:5055"
 	@echo "$(YELLOW)Jellystat     :$(NC) http://localhost:3000"
 	@echo "$(YELLOW)qBittorrent   :$(NC) http://localhost:8090"
+	@echo "$(YELLOW)RDTClient     :$(NC) http://localhost:6500"
 	@echo "$(YELLOW)Flaresolverr  :$(NC) http://localhost:8191"
 	@echo ""
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"

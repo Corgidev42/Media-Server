@@ -29,6 +29,7 @@ CONTAINERS=(
     "prowlarr"
     "radarr" 
     "sonarr"
+    "jackett"
     "jellyseerr"
     "overseerr"
     "qbittorrent"
@@ -37,6 +38,8 @@ CONTAINERS=(
     "jellyfin"
     "jellystat"
     "jellystat-db"
+    "rdtclient"
+    "recyclarr"
 )
 
 for container in "${CONTAINERS[@]}"; do
@@ -59,12 +62,14 @@ VOLUMES=(
     "prowlarr_config"
     "radarr_config"
     "sonarr_config"
+    "jackett_config"
     "jellyseerr_config"
     "jellyfin_config"
     "jellystat_db"
     "qbittorrent_config"
     "flaresolverr_config"
     "gluetun_config"
+    "rdtclient_config"
 )
 
 for volume in "${VOLUMES[@]}"; do

@@ -1,10 +1,26 @@
 #!/bin/bash
 #==============================================================================
-# Installation YGGTorrent API pour Prowlarr (Docker)
+# [DÉPRÉCIÉ] Installation YGGTorrent API pour Prowlarr (Docker)
 # Basé sur : https://haste.laiteux.dev/raw/gyenbr
+#
+# ⚠️  CE SCRIPT EST DÉPRÉCIÉ — Utilisez Jackett à la place.
+#     Jackett gère nativement YGGTorrent avec FlareSolverr.
+#     Configurez YGG dans l'UI Jackett : http://localhost:9117
+#     Voir setup.sh (étape 5b) pour l'intégration automatique.
 #==============================================================================
 
 set -e
+
+echo ""
+echo "⚠️  ATTENTION : Ce script est DÉPRÉCIÉ."
+echo "   Utilisez Jackett pour accéder à YGGTorrent."
+echo "   → http://localhost:9117"
+echo ""
+read -rp "Continuer quand même ? (y/N) " confirm
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+    echo "Annulé."
+    exit 0
+fi
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

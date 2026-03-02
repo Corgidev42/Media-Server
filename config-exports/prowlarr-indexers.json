@@ -54,6 +54,7 @@
         "name": "baseUrl",
         "label": "Base Url",
         "helpText": "Select which base url Prowlarr will use for requests to the site",
+        "value": "https://1337x.to",
         "type": "select",
         "advanced": false,
         "selectOptionsProviderAction": "getUrls",
@@ -152,7 +153,7 @@
         "name": "torrentBaseSettings.preferMagnetUrl",
         "label": "Prefer Magnet URL",
         "helpText": "When enabled, this indexer will prefer the use of magnet URLs for grabs with fallback to torrent links",
-        "value": false,
+        "value": true,
         "type": "checkbox",
         "advanced": true,
         "privacy": "normal",
@@ -162,7 +163,6 @@
         "order": 0,
         "name": "uploader",
         "label": "Filter by Uploader",
-        "value": "",
         "type": "textbox",
         "advanced": false,
         "privacy": "normal",
@@ -257,7 +257,7 @@
         "order": 7,
         "name": "sort",
         "label": "Sort requested from site",
-        "value": 0,
+        "value": 2,
         "type": "select",
         "advanced": false,
         "selectOptions": [
@@ -733,6 +733,7 @@
       "https://nyaa.si/",
       "https://nyaa.iss.ink/",
       "https://nyaa.land/",
+      "https://nyaa.mom/",
       "https://nyaa.unblockninja.com/"
     ],
     "legacyUrls": [
@@ -1851,297 +1852,6 @@
     "implementation": "Cardigann",
     "configContract": "CardigannSettings",
     "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#torrentgalaxyclone",
-    "tags": [
-      1
-    ]
-  },
-  {
-    "indexerUrls": [
-      "https://yggapi.eu/"
-    ],
-    "legacyUrls": [],
-    "definitionName": "ygg-api-magnet",
-    "description": "Indexeur non-officiel pour YggTorrent (YGG) - MOVIES / TV",
-    "language": "fr-FR",
-    "encoding": "Unicode (UTF-8)",
-    "enable": false,
-    "redirect": false,
-    "supportsRss": true,
-    "supportsSearch": true,
-    "supportsRedirect": false,
-    "supportsPagination": false,
-    "appProfileId": 1,
-    "protocol": "torrent",
-    "privacy": "private",
-    "priority": 25,
-    "downloadClientId": 0,
-    "name": "YggAPI",
-    "fields": [
-      {
-        "order": 0,
-        "name": "definitionFile",
-        "value": "ygg-api-magnet",
-        "type": "textbox",
-        "advanced": false,
-        "hidden": "hidden",
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 1,
-        "name": "baseUrl",
-        "label": "Base Url",
-        "helpText": "Select which base url Prowlarr will use for requests to the site",
-        "type": "select",
-        "advanced": false,
-        "selectOptionsProviderAction": "getUrls",
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 2,
-        "name": "baseSettings.queryLimit",
-        "label": "Query Limit",
-        "helpText": "The number of max queries as specified by the respective unit that Prowlarr will allow to the site",
-        "type": "number",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 3,
-        "name": "baseSettings.grabLimit",
-        "label": "Grab Limit",
-        "helpText": "The number of max grabs as specified by the respective unit that Prowlarr will allow to the site",
-        "type": "number",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 4,
-        "name": "baseSettings.limitsUnit",
-        "label": "Limits Unit",
-        "helpText": "The unit of time for counting limits per indexer",
-        "value": 0,
-        "type": "select",
-        "advanced": true,
-        "selectOptions": [
-          {
-            "value": 0,
-            "name": "Day",
-            "order": 0,
-            "hint": "(0)"
-          },
-          {
-            "value": 1,
-            "name": "Hour",
-            "order": 1,
-            "hint": "(1)"
-          }
-        ],
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 5,
-        "name": "torrentBaseSettings.appMinimumSeeders",
-        "label": "Apps Minimum Seeders",
-        "helpText": "Minimum seeders required by the Applications for the indexer to grab, empty is Sync profile's default",
-        "type": "number",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 6,
-        "name": "torrentBaseSettings.seedRatio",
-        "label": "Seed Ratio",
-        "helpText": "The ratio a torrent should reach before stopping, empty uses the download client's default. Ratio should be at least 1.0 and follow the indexers rules",
-        "type": "number",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": true
-      },
-      {
-        "order": 7,
-        "name": "torrentBaseSettings.seedTime",
-        "label": "Seed Time",
-        "unit": "minutes",
-        "helpText": "The time a torrent should be seeded before stopping, empty uses the download client's default",
-        "type": "number",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 8,
-        "name": "torrentBaseSettings.packSeedTime",
-        "label": "Pack Seed Time",
-        "unit": "minutes",
-        "helpText": "The time a pack (season or discography) torrent should be seeded before stopping, empty is app's default",
-        "type": "number",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 9,
-        "name": "torrentBaseSettings.preferMagnetUrl",
-        "label": "Prefer Magnet URL",
-        "helpText": "When enabled, this indexer will prefer the use of magnet URLs for grabs with fallback to torrent links",
-        "value": false,
-        "type": "checkbox",
-        "advanced": true,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 0,
-        "name": "passkey",
-        "label": "Passkey",
-        "value": "I4s7cahSMPSBh5jnjfyvPkYk3f75msyV",
-        "type": "password",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 1,
-        "name": "info_key",
-        "label": "About your passkey",
-        "value": "You will find your passkey on the <a href=\"https://www.yggtorrent.top/user/account\" target=\"_blank\">YGG</a> account page.",
-        "type": "info",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 2,
-        "name": "sort",
-        "label": "Sort requested from site",
-        "value": 2,
-        "type": "select",
-        "advanced": false,
-        "selectOptions": [
-          {
-            "value": 0,
-            "name": "downloads",
-            "order": 0
-          },
-          {
-            "value": 1,
-            "name": "seeders",
-            "order": 0
-          },
-          {
-            "value": 2,
-            "name": "publish_date",
-            "order": 0
-          }
-        ],
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 3,
-        "name": "multilang",
-        "label": "Replace MULTi by another language in release name",
-        "value": false,
-        "type": "checkbox",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 4,
-        "name": "multilanguage",
-        "label": "Replace MULTi by this language",
-        "value": 1,
-        "type": "select",
-        "advanced": false,
-        "selectOptions": [
-          {
-            "value": 0,
-            "name": "ENGLISH",
-            "order": 0
-          },
-          {
-            "value": 1,
-            "name": "FRENCH",
-            "order": 0
-          },
-          {
-            "value": 2,
-            "name": "MULTi.ENGLISH",
-            "order": 0
-          },
-          {
-            "value": 3,
-            "name": "MULTi.FRENCH",
-            "order": 0
-          },
-          {
-            "value": 4,
-            "name": "MULTi.VOSTFR",
-            "order": 0
-          },
-          {
-            "value": 5,
-            "name": "VOSTFR",
-            "order": 0
-          }
-        ],
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 5,
-        "name": "strip_season",
-        "label": "Strip season-only (e.g. S01) from searches, as tracker does not support partial matches",
-        "value": true,
-        "type": "checkbox",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 6,
-        "name": "tracker_domain",
-        "label": "Domaine du tracker à utiliser",
-        "value": 0,
-        "type": "select",
-        "advanced": false,
-        "selectOptions": [
-          {
-            "value": 0,
-            "name": "connect.maxp2p.org",
-            "order": 0
-          },
-          {
-            "value": 1,
-            "name": "tracker.p2p-world.net",
-            "order": 0
-          }
-        ],
-        "privacy": "normal",
-        "isFloat": false
-      },
-      {
-        "order": 7,
-        "name": "info_downloads",
-        "label": "About missing Downloads",
-        "value": "If the torrent has no seeder and no leecher then the torrent file may be missing and download may fail.",
-        "type": "info",
-        "advanced": false,
-        "privacy": "normal",
-        "isFloat": false
-      }
-    ],
-    "implementationName": "Cardigann",
-    "implementation": "Cardigann",
-    "configContract": "CardigannSettings",
-    "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#ygg-api-magnet",
     "tags": [
       1
     ]

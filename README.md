@@ -1,6 +1,6 @@
 # Media Server Stack
 
-Stack Docker automatisee : Jellyfin + Radarr + Sonarr + Prowlarr + qBittorrent + VPN
+Stack Docker automatisee : Jellyfin + Radarr + Sonarr + Prowlarr + Jackett + qBittorrent + AllDebrid + VPN
 
 ---
 
@@ -28,7 +28,9 @@ make setup
 | Radarr | 7878 | http://localhost:7878 (Films) |
 | Sonarr | 8989 | http://localhost:8989 (Series) |
 | Prowlarr | 9696 | http://localhost:9696 (Indexeurs) |
+| Jackett | 9117 | http://localhost:9117 (YGGTorrent / trackers prives) |
 | qBittorrent | 8090 | http://localhost:8090 (via VPN) |
+| RDTClient | 6500 | http://localhost:6500 (AllDebrid / Real-Debrid) |
 | Jellyseerr | 5055 | http://localhost:5055 (Requetes) |
 | Jellystat | 3000 | http://localhost:3000 (Stats Jellyfin) |
 | Flaresolverr | 8191 | http://localhost:8191 (Anti-Cloudflare) |
@@ -76,10 +78,12 @@ make import
 ### Config manuelle
 
 1. **Prowlarr** - Ajouter indexeurs + connecter Radarr/Sonarr
-2. **qBittorrent** - Desactiver "Host header validation"
-3. **Radarr** - Root `/data/media/movies` + Download client `gluetun:8090`
-4. **Sonarr** - Root `/data/media/tv` + Download client `gluetun:8090`
-5. **Jellyfin** - Ajouter bibliotheques (fait automatiquement par setup.sh)
+2. **Jackett** - Configurer YGGTorrent (credentials prives)
+3. **RDTClient** - Configurer AllDebrid API key (http://localhost:6500)
+4. **qBittorrent** - Desactiver "Host header validation"
+5. **Radarr** - Root `/data/media/movies` + Download client `gluetun:8090`
+6. **Sonarr** - Root `/data/media/tv` + Download client `gluetun:8090`
+7. **Jellyfin** - Ajouter bibliotheques (fait automatiquement par setup.sh)
 
 Puis sauvegarder :
 ```bash

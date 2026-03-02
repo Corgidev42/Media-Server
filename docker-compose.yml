@@ -80,6 +80,26 @@ services:
     restart: unless-stopped
 
   #============================================================================
+  # Jackett - Indexeur YGGTorrent (tracker privé)
+  # Interface: http://localhost:9117
+  #============================================================================
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    ports:
+      - "9117:9117"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true
+    volumes:
+      - jackett_config:/config
+    networks:
+      - media-network
+    restart: unless-stopped
+
+  #============================================================================
   # Prowlarr - Gestionnaire d'indexeurs
   #============================================================================
   prowlarr:
@@ -236,6 +256,25 @@ services:
       - media-network
     restart: unless-stopped
 
+  #============================================================================
+  # RDTClient - Client Debrid (AllDebrid/Real-Debrid)
+  # Emule l'API qBittorrent → compatible Radarr/Sonarr
+  # Interface: http://localhost:6500
+  #============================================================================
+  rdtclient:
+    image: rogerfar/rdtclient:latest
+    container_name: rdtclient
+    ports:
+      - "6500:6500"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - rdtclient_config:/data/db
+      - ${DATA_PATH}/downloads:/data/downloads
+    networks:
+      - media-network
+    restart: unless-stopped
+
 #==============================================================================
 # Volumes Docker (configurations persistantes)
 #==============================================================================
@@ -256,6 +295,10 @@ volumes:
     name: jellyfin_config
   jellystat_db:
     name: jellystat_db
+  jackett_config:
+    name: jackett_config
+  rdtclient_config:
+    name: rdtclient_config
 
 #==============================================================================
 # Réseau isolé
