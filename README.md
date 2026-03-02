@@ -1,6 +1,6 @@
 # ArrStack
 
-Stack Docker automatisee : Jellyfin + Radarr + Sonarr + Prowlarr + Jackett + qBittorrent + AllDebrid + VPN
+Stack Docker automatisee : Jellyfin + Jellyseerr + Radarr + Sonarr + Prowlarr + Jackett + qBittorrent + RDTClient (AllDebrid) + VPN + Recyclarr
 
 ---
 
@@ -22,18 +22,19 @@ make setup
 
 ## Services
 
-| Service | Port | Description |
-|---------|------|-------------|
-| Jellyfin | 8096 | http://localhost:8096 (Lecture multimedia) |
-| Radarr | 7878 | http://localhost:7878 (Films) |
-| Sonarr | 8989 | http://localhost:8989 (Series) |
-| Prowlarr | 9696 | http://localhost:9696 (Indexeurs) |
-| Jackett | 9117 | http://localhost:9117 (YGGTorrent / trackers prives) |
-| qBittorrent | 8090 | http://localhost:8090 (via VPN) |
-| RDTClient | 6500 | http://localhost:6500 (AllDebrid / Real-Debrid) |
-| Jellystat | 3000 | http://localhost:3000 (Stats Jellyfin) |
-| Flaresolverr | 8191 | http://localhost:8191 (Anti-Cloudflare) |
-| Recyclarr | - | TRaSH Guides auto-sync |
+| Service | Port | URL | Description |
+|---------|------|-----|-------------|
+| Jellyfin | 8096 | http://localhost:8096 | Serveur multimedia (lecture) |
+| Jellyseerr | 5055 | http://localhost:5055 | Interface de requetes (films/series) |
+| Radarr | 7878 | http://localhost:7878 | Gestionnaire de films |
+| Sonarr | 8989 | http://localhost:8989 | Gestionnaire de series |
+| Prowlarr | 9696 | http://localhost:9696 | Gestionnaire d'indexeurs |
+| Jackett | 9117 | http://localhost:9117 | Indexeur YGGTorrent (tracker prive) |
+| qBittorrent | 8090 | http://localhost:8090 | Client torrent (via VPN NordVPN) |
+| RDTClient | 6500 | http://localhost:6500 | Client debrid (AllDebrid / Real-Debrid) |
+| Jellystat | 6555 | http://localhost:6555 | Statistiques Jellyfin |
+| Flaresolverr | 8191 | http://localhost:8191 | Contournement Cloudflare |
+| Recyclarr | - | - | Sync auto TRaSH Guides (quality profiles) |
 
 ---
 
@@ -74,17 +75,29 @@ Si vous avez une config exportee :
 make import
 ```
 
-### Config manuelle
+### Ce que `make setup` configure automatiquement
 
-1. **Prowlarr** - Ajouter indexeurs + connecter Radarr/Sonarr
-2. **Jackett** - Configurer YGGTorrent (credentials prives)
-3. **RDTClient** - Configurer AllDebrid API key (http://localhost:6500)
-4. **qBittorrent** - Desactiver "Host header validation"
-5. **Radarr** - Root `/data/media/movies` + Download client `gluetun:8090`
-6. **Sonarr** - Root `/data/media/tv` + Download client `gluetun:8090`
-7. **Jellyfin** - Ajouter bibliotheques (fait automatiquement par setup.sh)
+| Service | Configuration automatique |
+|---------|-------------------------|
+| **Radarr / Sonarr / Prowlarr** | API keys, auth (forms + local bypass), root folders |
+| **Prowlarr** | FlareSolverr, 1337x, YGGTorrent (via Jackett) |
+| **Jackett** | FlareSolverr, YGGTorrent (si credentials dans .env) |
+| **RDTClient** | Compte, AllDebrid provider + API key, download path |
+| **Radarr / Sonarr** | Download client RDTClient (rdtclient:6500) |
+| **Jellyfin** | Wizard, admin, bibliotheques Films/Series, plugin Trakt |
+| **Jellyseerr** | Connexion Jellyfin + Radarr + Sonarr |
+| **Jellystat** | Connexion Jellyfin (API key auto) |
+| **Recyclarr** | TRaSH Guides (quality profiles, custom formats) |
 
-Puis sauvegarder :
+### Config manuelle (optionnel)
+
+Si vous preferez configurer manuellement apres `make setup` :
+
+1. **qBittorrent** - Desactiver "Host header validation" (http://localhost:8090)
+2. **Trakt** - Jellyfin > Dashboard > Plugins > Trakt > Authorize
+3. **Infuse** - Ajouter serveur Jellyfin
+
+Puis sauvegarder votre config :
 ```bash
 make export
 ```
@@ -143,6 +156,30 @@ ArrStack/
 │   └── settings.yml         # Settings
 │
 └── backups/                 # Archives tar.gz des volumes Docker
+```
+
+---
+
+## Architecture
+
+```
+Jellyseerr (requetes)
+    |
+    v
+Radarr / Sonarr (gestion media)
+    |
+    v
+Prowlarr / Jackett (indexeurs) ──> recherche torrents
+    |
+    v
+RDTClient (AllDebrid)          ──> telecharge via debrid (instantane)
+qBittorrent (VPN NordVPN)      ──> telecharge via torrent (backup)
+    |
+    v
+/data/downloads ──> atomic move ──> /data/media
+    |
+    v
+Jellyfin (lecture) ──> Infuse / clients
 ```
 
 ---
