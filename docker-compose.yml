@@ -1,5 +1,5 @@
 #==============================================================================
-# Stack Media Server - Configuration Docker Compose
+# ArrStack - Configuration Docker Compose
 # Architecture: Atomic Moves (/data structure)
 # Réseau: media-network (isolé)
 # VPN: Gluetun (NordVPN) pour qBittorrent uniquement

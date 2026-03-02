@@ -1,4 +1,4 @@
-# Media Server Stack
+# ArrStack
 
 Stack Docker automatisee : Jellyfin + Radarr + Sonarr + Prowlarr + Jackett + qBittorrent + AllDebrid + VPN
 
@@ -110,7 +110,7 @@ make setup  # Import auto si config-exports/ existe
 ## Structure du projet
 
 ```
-Media-Server/
+ArrStack/
 ├── docker-compose.yml      # Definition des services
 ├── Makefile                 # Commandes raccourcies
 ├── .env.example             # Template variables d'environnement

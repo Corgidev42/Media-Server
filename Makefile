@@ -1,5 +1,5 @@
 # ============================================================================
-# Makefile - Stack Media Server (Jellyfin + Servarr + VPN)
+# Makefile - ArrStack (Jellyfin + Servarr + VPN)
 # ============================================================================
 # Usage: make <command>
 # Exemple: make start, make logs-radarr, make backup-all
@@ -25,7 +25,7 @@ TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
 
 help: ## Affiche l'aide
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
-	@echo "$(GREEN)  Stack Media Server - Commandes Makefile$(NC)"
+	@echo "$(GREEN)  ArrStack - Commandes Makefile$(NC)"
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
 	@echo ""
 	@echo "$(YELLOW)📦 GESTION DES SERVICES :$(NC)"
@@ -112,7 +112,7 @@ help: ## Affiche l'aide
 # ============================================================================
 
 start: ## Démarrer tous les services
-	@echo "$(GREEN)🚀 Démarrage de la stack Media Server...$(NC)"
+	@echo "$(GREEN)🚀 Démarrage de ArrStack...$(NC)"
 	@$(COMPOSE) up -d
 	@echo "$(GREEN)✅ Stack démarrée ! Attendez 10-15 secondes que tout soit prêt.$(NC)"
 	@sleep 15
@@ -545,7 +545,7 @@ urls: ## Afficher les URLs d'accès
 # Installation
 install: ## Installation complète (première fois)
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
-	@echo "$(GREEN)  Installation de la Stack Media Server$(NC)"
+	@echo "$(GREEN)  Installation de ArrStack$(NC)"
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"
 	@echo ""
 	@echo "$(YELLOW)1. Création de la structure de dossiers...$(NC)"
@@ -674,7 +674,7 @@ package: ## Créer archive complète
 	@./scripts/export-config.sh
 	@echo ""
 	@echo "$(YELLOW)📦 Création de l'archive...$(NC)"
-	@tar -czf media-server-config-$(TIMESTAMP).tar.gz \
+	@tar -czf arrstack-config-$(TIMESTAMP).tar.gz \
 		docker-compose.yml \
 		.env.example \
 		config-exports/ \
@@ -685,13 +685,13 @@ package: ## Créer archive complète
 		Makefile \
 		README.md \
 		2>/dev/null || true
-	@echo "$(GREEN)✅ Archive créée : media-server-config-$(TIMESTAMP).tar.gz$(NC)"
+	@echo "$(GREEN)✅ Archive créée : arrstack-config-$(TIMESTAMP).tar.gz$(NC)"
 	@echo ""
 	@echo "$(YELLOW)📋 Contenu de l'archive :$(NC)"
-	@tar -tzf media-server-config-$(TIMESTAMP).tar.gz | head -20
+	@tar -tzf arrstack-config-$(TIMESTAMP).tar.gz | head -20
 	@echo ""
 	@echo "$(GREEN)🎉 Archive prête à partager !$(NC)"
-	@ls -lh media-server-config-$(TIMESTAMP).tar.gz
+	@ls -lh arrstack-config-$(TIMESTAMP).tar.gz
 
 show-api-keys: ## Afficher toutes les API keys
 	@echo "$(BLUE)════════════════════════════════════════════════════════════════$(NC)"

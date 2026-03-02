@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Setup automatique complet — Stack Media Server
+# Setup automatique complet — ArrStack
 # Configure tout via CLI : structure, API keys, auth *arr, Jellyfin wizard,
 # bibliothèques, import config, VPN check
 #==============================================================================
@@ -30,7 +30,7 @@ set -a
 set +a
 
 echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║          Setup Media Server — Installation          ║${NC}"
+echo -e "${BLUE}║             ArrStack — Installation                 ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════════════╝${NC}\n"
 
 # ── Vérifications ────────────────────────────────────────────────────────
@@ -354,7 +354,7 @@ echo -e "${YELLOW}🎬 [6/7] Configuration Jellyfin...${NC}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 JELLYFIN_HOST="${JELLYFIN_HOST:-http://localhost:8096}"
-JELLYFIN_SERVER_NAME="${JELLYFIN_SERVER_NAME:-Media Server}"
+JELLYFIN_SERVER_NAME="${JELLYFIN_SERVER_NAME:-ArrStack}"
 JELLYFIN_LANG="${JELLYFIN_LANG:-fr}"
 JELLYFIN_COUNTRY="${JELLYFIN_COUNTRY:-FR}"
 MOVIES_PATH="/data/media/movies"
