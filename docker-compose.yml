@@ -193,7 +193,7 @@ services:
       - JELLYFIN_PublishedServerUrl=${JELLYFIN_URL:-http://localhost:8096}
     volumes:
       - jellyfin_config:/config
-      - ${DATA_PATH}/media:/data/media:ro
+      - ${DATA_PATH}/media:/data/media
     networks:
       - media-network
     restart: unless-stopped
