@@ -2,13 +2,8 @@
   {
     "path": "/data/media/movies",
     "accessible": true,
-    "freeSpace": 34097319936,
+    "freeSpace": 29474287616,
     "unmappedFolders": [
-      {
-        "name": "Inception (2010)",
-        "path": "/data/media/movies/Inception (2010)",
-        "relativePath": "Inception (2010)"
-      },
       {
         "name": "The Lord of the Rings - The Fellowship of the Ring (2001)",
         "path": "/data/media/movies/The Lord of the Rings - The Fellowship of the Ring (2001)",
